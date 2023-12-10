@@ -1,6 +1,6 @@
+import { svelte } from "@sveltejs/vite-plugin-svelte";
 import path from "node:path";
 import { defineConfig } from "vite";
-import { svelte } from "@sveltejs/vite-plugin-svelte";
 
 export default defineConfig({
   test: {
@@ -23,7 +23,7 @@ export default defineConfig({
   ],
   server: {
     host: "localhost",
-    port: 3000,
+    port: 4000,
     watch: {
       // reference: https://stackoverflow.com/a/75238360
       useFsEvents: false,
