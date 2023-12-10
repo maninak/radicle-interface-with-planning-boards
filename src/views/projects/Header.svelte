@@ -80,7 +80,7 @@
       }}>
       <Button variant={activeTab === "board" ? "secondary" : "background"}>
         <IconSmall name="globe" />
-        <div>board</div>
+        <div>Planning Board</div>
       </Button>
     </Link>
   </Radio>
