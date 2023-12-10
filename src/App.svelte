@@ -1,8 +1,8 @@
 <script lang="ts">
   import Plausible from "plausible-tracker";
 
-  import * as router from "@app/lib/router";
   import * as httpd from "@app/lib/httpd";
+  import * as router from "@app/lib/router";
   import { unreachable } from "@app/lib/utils";
 
   import Footer from "./App/Footer.svelte";
@@ -11,18 +11,19 @@
   import Hotkeys from "./App/Hotkeys.svelte";
   import LoadingBar from "./App/LoadingBar.svelte";
 
+  import NotFound from "@app/views/NotFound.svelte";
+  import Home from "@app/views/home/Index.svelte";
+  import Nodes from "@app/views/nodes/View.svelte";
+  import Board from "@app/views/projects/Board.svelte";
   import Commit from "@app/views/projects/Commit.svelte";
   import History from "@app/views/projects/History.svelte";
-  import Home from "@app/views/home/Index.svelte";
   import Issue from "@app/views/projects/Issue.svelte";
-  import Issues from "@app/views/projects/Issues.svelte";
   import NewIssue from "@app/views/projects/Issue/New.svelte";
-  import Nodes from "@app/views/nodes/View.svelte";
-  import NotFound from "@app/views/NotFound.svelte";
+  import Issues from "@app/views/projects/Issues.svelte";
   import Patch from "@app/views/projects/Patch.svelte";
   import Patches from "@app/views/projects/Patches.svelte";
-  import Session from "@app/views/session/Index.svelte";
   import Source from "@app/views/projects/Source.svelte";
+  import Session from "@app/views/session/Index.svelte";
 
   import LoadError from "@app/components/LoadError.svelte";
   import Loading from "@app/components/Loading.svelte";
@@ -82,6 +83,8 @@
     <Patches {...$activeRouteStore.params} />
   {:else if $activeRouteStore.resource === "project.patch"}
     <Patch {...$activeRouteStore.params} />
+  {:else if $activeRouteStore.resource === "project.board"}
+    <Board {...$activeRouteStore.params} />
   {:else if $activeRouteStore.resource === "loadError"}
     <LoadError {...$activeRouteStore.params} />
   {:else if $activeRouteStore.resource === "notFound"}

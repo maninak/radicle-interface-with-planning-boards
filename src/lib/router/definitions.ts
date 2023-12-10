@@ -1,13 +1,13 @@
-import type { HomeRoute, HomeLoadedRoute } from "@app/views/home/router";
+import type { HomeLoadedRoute, HomeRoute } from "@app/views/home/router";
+import type { NodesLoadedRoute, NodesRoute } from "@app/views/nodes/router";
 import type {
   ProjectLoadedRoute,
   ProjectRoute,
 } from "@app/views/projects/router";
-import type { NodesRoute, NodesLoadedRoute } from "@app/views/nodes/router";
 
 import { loadHomeRoute } from "@app/views/home/router";
-import { loadProjectRoute } from "@app/views/projects/router";
 import { loadNodeRoute } from "@app/views/nodes/router";
+import { loadProjectRoute } from "@app/views/projects/router";
 
 interface BootingRoute {
   resource: "booting";
@@ -63,7 +63,8 @@ export async function loadRoute(route: Route): Promise<LoadedRoute> {
     route.resource === "project.newIssue" ||
     route.resource === "project.issue" ||
     route.resource === "project.patches" ||
-    route.resource === "project.patch"
+    route.resource === "project.patch" ||
+    route.resource === "project.board"
   ) {
     return await loadProjectRoute(route);
   } else {

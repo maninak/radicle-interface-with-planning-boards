@@ -1,8 +1,8 @@
+import { E_CANCELED, E_TIMEOUT, Mutex, withTimeout } from "async-mutex";
 import { derived, get, writable } from "svelte/store";
-import { withTimeout, Mutex, E_CANCELED, E_TIMEOUT } from "async-mutex";
 
-import { HttpdClient } from "@httpd-client";
 import { config } from "@app/lib/config";
+import { HttpdClient } from "@httpd-client";
 
 export interface Session {
   id: string;
