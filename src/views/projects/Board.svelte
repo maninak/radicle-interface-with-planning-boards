@@ -13,10 +13,11 @@
   export let project: Project;
   export let tracking: boolean;
 
-  let iframe: HTMLIFrameElement;
+  let iFrame: HTMLIFrameElement;
+  let isIFrameLoading = true;
 
   $: {
-    iframe?.contentWindow?.postMessage(
+    iFrame?.contentWindow?.postMessage(
       { type: "theme", theme: $theme } satisfies RPBMessage,
       "*",
     );
@@ -34,12 +35,16 @@
 <Layout {baseUrl} {project} {tracking} activeTab="board">
   <div class="board">
     <iframe
-      bind:this={iframe}
+      bind:this={iFrame}
       title="Planning Board"
       src="http://localhost:3000?initialTheme={originalTheme}"
       width="100%"
       height="100%"
-      frameborder="0">
+      frameborder="0"
+      style:visibility={isIFrameLoading ? "hidden" : "visible"}
+      on:load={() => {
+        isIFrameLoading = false;
+      }}>
     </iframe>
   </div>
 </Layout>
