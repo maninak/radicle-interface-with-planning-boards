@@ -36,7 +36,7 @@
     <iframe
       bind:this={iframe}
       title="Planning Board"
-      src="http://localhost:3000?originalTheme={originalTheme}"
+      src="http://localhost:3000?initialTheme={originalTheme}"
       width="100%"
       height="100%"
       frameborder="0">
