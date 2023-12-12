@@ -4,6 +4,8 @@
 
   import { theme, type Theme } from "@app/lib/appearance";
 
+  const RPB_URL = "https://chipper-wisp-c7553e.netlify.app";
+
   interface RPBMessage {
     type: "theme";
     theme: Theme;
@@ -19,7 +21,7 @@
   $: {
     iFrame?.contentWindow?.postMessage(
       { type: "theme", theme: $theme } satisfies RPBMessage,
-      "*",
+      RPB_URL,
     );
   }
 
@@ -37,7 +39,7 @@
     <iframe
       bind:this={iFrame}
       title="Planning Board"
-      src="http://localhost:3000?initialTheme={originalTheme}"
+      src="{RPB_URL}/?initialTheme={originalTheme}"
       width="100%"
       height="100%"
       frameborder="0"
