@@ -156,10 +156,11 @@ export const test = base.extend<{
       outputLog,
     });
     await use(peerManager);
+    await peerManager.shutdown();
   },
 
   authenticatedPeer: async ({ page, peerManager }, use) => {
-    const peer = await peerManager.startPeer({
+    const peer = await peerManager.createPeer({
       name: "httpd",
       gitOptions: gitOptions["bob"],
     });
@@ -190,9 +191,6 @@ export const test = base.extend<{
     }
 
     await use(peer);
-
-    await peer.stopHttpd();
-    await peer.stopNode();
   },
 
   // eslint-disable-next-line no-empty-pattern
@@ -288,12 +286,12 @@ export async function createSourceBrowsingFixture(
     sourceBrowsingDir,
   ]);
   const rid = sourceBrowsingRid;
-  const alice = await peerManager.startPeer({
+  const alice = await peerManager.createPeer({
     name: "alice",
     gitOptions: gitOptions["alice"],
   });
   const aliceProjectPath = Path.join(alice.checkoutPath, "source-browsing");
-  const bob = await peerManager.startPeer({
+  const bob = await peerManager.createPeer({
     name: "bob",
     gitOptions: gitOptions["bob"],
   });

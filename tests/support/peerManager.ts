@@ -64,7 +64,7 @@ export interface RoutingEntry {
 
 interface PeerManagerParams {
   dataPath: string;
-  node: string;
+  radSeed: string;
   // Name for easy identification. Used on file system and in logs.
   name: string;
   gitOptions?: Record<string, string>;
@@ -72,14 +72,14 @@ interface PeerManagerParams {
 }
 
 export interface PeerManager {
-  startPeer(params: {
+  createPeer(params: {
     name: string;
     gitOptions?: Record<string, string>;
   }): Promise<RadiclePeer>;
-}
-
-export function generateNode(index: number) {
-  return Array(64).fill(index.toString()).join("");
+  /**
+   * Kill all processes spawned by any of the peers
+   */
+  shutdown(): Promise<void>;
 }
 
 export async function createPeerManager(createParams: {
@@ -98,19 +98,24 @@ export async function createPeerManager(createParams: {
     outputLog = outputLogFile.createWriteStream();
   }
 
-  const nodes: RadiclePeer[] = [];
+  const peers: RadiclePeer[] = [];
   return {
-    async startPeer(params) {
+    async createPeer(params) {
       const peer = await RadiclePeer.create({
         dataPath: createParams.dataDir,
         name: params.name,
         gitOptions: params.gitOptions,
-        node: generateNode(nodes.length + 1),
+        radSeed: Array(64)
+          .fill((peers.length + 1).toString())
+          .join(""),
         outputLog,
       });
-      nodes.push(peer);
+      peers.push(peer);
 
       return peer;
+    },
+    async shutdown() {
+      await Promise.all(peers.map(peer => peer.shutdown()));
     },
   };
 }
@@ -155,7 +160,7 @@ export class RadiclePeer {
   public checkoutPath: string;
   public nodeId: string;
 
-  #node: string;
+  #radSeed: string;
   #socket: string;
   #radHome: string;
   #eventRecords: NodeEvent[] = [];
@@ -167,11 +172,12 @@ export class RadiclePeer {
   #httpdProcess?: ExecaChildProcess;
   // Name for easy identification. Used on file system and in logs.
   #name: string;
+  #childProcesses: ExecaChildProcess[] = [];
 
   private constructor(props: {
     checkoutPath: string;
     nodeId: string;
-    node: string;
+    radSeed: string;
     socket: string;
     gitOptions?: Record<string, string>;
     radHome: string;
@@ -181,7 +187,7 @@ export class RadiclePeer {
     this.checkoutPath = props.checkoutPath;
     this.nodeId = props.nodeId;
     this.#gitOptions = props.gitOptions;
-    this.#node = props.node;
+    this.#radSeed = props.radSeed;
     this.#socket = props.socket;
     this.#radHome = props.radHome;
     this.#outputLog = props.logFile;
@@ -212,7 +218,7 @@ export class RadiclePeer {
     dataPath,
     name,
     gitOptions,
-    node,
+    radSeed: node,
     outputLog: logFile,
   }: PeerManagerParams): Promise<RadiclePeer> {
     const checkoutPath = Path.join(dataPath, name, "copy");
@@ -239,7 +245,7 @@ export class RadiclePeer {
     return new RadiclePeer({
       checkoutPath,
       gitOptions,
-      node,
+      radSeed: node,
       socket,
       nodeId,
       radHome,
@@ -272,9 +278,9 @@ export class RadiclePeer {
 
   public async stopHttpd() {
     if (!this.#httpdBaseUrl || !this.#httpdProcess) {
-      throw new Error("No httpd service running");
+      return;
     }
-    this.#httpdProcess?.kill("SIGTERM");
+    this.#httpdProcess.kill("SIGTERM");
 
     await waitOn({
       resources: [
@@ -360,6 +366,17 @@ export class RadiclePeer {
     });
   }
 
+  /**
+   * Kill all child processes created with `spawn()`, the node process and the
+   * HTTP API process.
+   */
+  public async shutdown() {
+    // We don’t care about proper cleanup. We just want to make sure that no
+    // processes are running anymore.
+    this.#childProcesses.forEach(p => p.kill("SIGKILL"));
+    await Promise.all([this.stopNode(), this.stopHttpd()]);
+  }
+
   public get address(): string {
     if (!this.#listenSocketAddr) {
       throw new Error("Remote node has no listen addr yet");
@@ -408,13 +425,14 @@ export class RadiclePeer {
         RAD_HOME: this.#radHome,
         RAD_PASSPHRASE: "asdf",
         RAD_COMMIT_TIME: "1671125284",
-        RAD_SEED: this.#node,
+        RAD_SEED: this.#radSeed,
         RAD_SOCKET: this.#socket,
         ...opts?.env,
         ...this.#gitOptions,
       },
     };
     const childProcess = Process.spawn(cmd, args, opts);
+    this.#childProcesses.push(childProcess);
 
     if (opts.logPrefix !== null) {
       void Process.prefixOutput(

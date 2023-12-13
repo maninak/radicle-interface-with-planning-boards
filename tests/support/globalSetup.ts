@@ -45,7 +45,7 @@ export default async function globalSetup(): Promise<() => void> {
       .setMaxListeners(16),
   });
 
-  const palm = await peerManager.startPeer({
+  const palm = await peerManager.createPeer({
     name: "palm",
     gitOptions: gitOptions["alice"],
   });
@@ -77,7 +77,7 @@ export default async function globalSetup(): Promise<() => void> {
   }
 
   return async () => {
-    await palm.stopNode();
+    await peerManager.shutdown();
     killAllProcesses();
   };
 }
