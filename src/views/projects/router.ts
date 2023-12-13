@@ -204,7 +204,7 @@ export type ProjectLoadedRoute =
       params: {
         baseUrl: BaseUrl;
         project: Project;
-        tracking: boolean;
+        seeding: boolean;
       };
     };
 
@@ -387,9 +387,9 @@ async function loadBoardView(
 ): Promise<ProjectLoadedRoute> {
   const api = new HttpdClient(route.node);
 
-  const [project, tracking] = await Promise.all([
+  const [project, seeding] = await Promise.all([
     api.project.getById(route.project),
-    isLocalNodeTracking(route),
+    isLocalNodeSeeding(route),
   ]);
 
   return {
@@ -397,7 +397,7 @@ async function loadBoardView(
     params: {
       baseUrl: route.node,
       project,
-      tracking,
+      seeding,
     },
   };
 }
