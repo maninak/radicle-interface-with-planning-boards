@@ -13,7 +13,7 @@
 
   export let baseUrl: BaseUrl;
   export let project: Project;
-  export let tracking: boolean;
+  export let seeding: boolean;
 
   let iFrame: HTMLIFrameElement;
   let isIFrameLoading = true;
@@ -34,7 +34,7 @@
   }
 </style>
 
-<Layout {baseUrl} {project} {tracking} activeTab="board">
+<Layout {baseUrl} {project} {seeding} activeTab="board">
   <div class="board">
     <iframe
       bind:this={iFrame}
