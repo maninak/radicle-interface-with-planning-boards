@@ -78,6 +78,16 @@
       }}>
       Patches
     </Link>
+  {:else if activeRoute.resource === "project.board"}
+    <Separator />
+    <Link
+      route={{
+        resource: "project.board",
+        project: activeRoute.params.project.id,
+        node: activeRoute.params.baseUrl,
+      }}>
+      Board
+    </Link>
   {:else if activeRoute.resource === "project.source"}
     <!-- Don't show anything, project name already links here -->
   {:else}

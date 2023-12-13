@@ -1,18 +1,18 @@
-import type { BaseUrl } from "@httpd-client";
 import type { LoadedRoute, Route } from "@app/lib/router/definitions";
+import type { BaseUrl } from "@httpd-client";
 
 import { writable } from "svelte/store";
 
-import * as mutexExecutor from "@app/lib/mutexExecutor";
-import * as utils from "@app/lib/utils";
 import { config } from "@app/lib/config";
+import * as mutexExecutor from "@app/lib/mutexExecutor";
+import { loadRoute } from "@app/lib/router/definitions";
+import * as utils from "@app/lib/utils";
+import { nodePath } from "@app/views/nodes/router";
 import {
   projectRouteToPath,
   projectTitle,
   resolveProjectRoute,
 } from "@app/views/projects/router";
-import { loadRoute } from "@app/lib/router/definitions";
-import { nodePath } from "@app/views/nodes/router";
 
 export { type Route };
 
@@ -134,7 +134,8 @@ function setTitle(loadedRoute: LoadedRoute) {
     loadedRoute.resource === "project.issues" ||
     loadedRoute.resource === "project.newIssue" ||
     loadedRoute.resource === "project.patches" ||
-    loadedRoute.resource === "project.patch"
+    loadedRoute.resource === "project.patch" ||
+    loadedRoute.resource === "project.board"
   ) {
     title.push(...projectTitle(loadedRoute));
   } else if (loadedRoute.resource === "nodes") {
@@ -249,7 +250,8 @@ export function routeToPath(route: Route): string {
     route.resource === "project.newIssue" ||
     route.resource === "project.issue" ||
     route.resource === "project.patches" ||
-    route.resource === "project.patch"
+    route.resource === "project.patch" ||
+    route.resource === "project.board"
   ) {
     return projectRouteToPath(route);
   } else if (

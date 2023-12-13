@@ -19,11 +19,11 @@ import type {
   Tree,
 } from "@httpd-client";
 
-import { HttpdClient } from "@httpd-client";
+import * as httpd from "@app/lib/httpd";
 import * as Syntax from "@app/lib/syntax";
 import { isLocal, unreachable } from "@app/lib/utils";
 import { nodePath } from "@app/views/nodes/router";
-import * as httpd from "@app/lib/httpd";
+import { HttpdClient } from "@httpd-client";
 
 export const COMMITS_PER_PAGE = 30;
 export const PATCHES_PER_PAGE = 10;
@@ -47,7 +47,8 @@ export type ProjectRoute =
       issue: string;
     }
   | ProjectPatchesRoute
-  | ProjectPatchRoute;
+  | ProjectPatchRoute
+  | ProjectBoardRoute;
 
 interface ProjectIssuesRoute {
   resource: "project.issues";
@@ -99,6 +100,12 @@ interface ProjectPatchesRoute {
   node: BaseUrl;
   project: string;
   search?: string;
+}
+
+interface ProjectBoardRoute {
+  resource: "project.board";
+  node: BaseUrl;
+  project: string;
 }
 
 export type ProjectLoadedRoute =
@@ -190,6 +197,14 @@ export type ProjectLoadedRoute =
         patch: Patch;
         view: PatchView;
         seeding: boolean;
+      };
+    }
+  | {
+      resource: "project.board";
+      params: {
+        baseUrl: BaseUrl;
+        project: Project;
+        tracking: boolean;
       };
     };
 
@@ -329,6 +344,8 @@ export async function loadProjectRoute(
       };
     } else if (route.resource === "project.patches") {
       return await loadPatchesView(route);
+    } else if (route.resource === "project.board") {
+      return await loadBoardView(route);
     } else {
       return unreachable(route);
     }
@@ -363,6 +380,26 @@ export async function loadProjectRoute(
       };
     }
   }
+}
+
+async function loadBoardView(
+  route: ProjectBoardRoute,
+): Promise<ProjectLoadedRoute> {
+  const api = new HttpdClient(route.node);
+
+  const [project, tracking] = await Promise.all([
+    api.project.getById(route.project),
+    isLocalNodeTracking(route),
+  ]);
+
+  return {
+    resource: "project.board",
+    params: {
+      baseUrl: route.node,
+      project,
+      tracking,
+    },
+  };
 }
 
 async function loadPatchesView(
@@ -757,6 +794,12 @@ export function resolveProjectRoute(
     }
   } else if (content === "patches") {
     return resolvePatchesRoute(node, project, segments, urlSearch);
+  } else if (content === "board") {
+    return {
+      resource: "project.board",
+      node,
+      project,
+    };
   } else {
     return null;
   }
@@ -880,6 +923,8 @@ export function projectRouteToPath(route: ProjectRoute): string {
     return url;
   } else if (route.resource === "project.patch") {
     return patchRouteToPath(route);
+  } else if (route.resource === "project.board") {
+    return [...pathSegments, "board"].join("/");
   } else {
     return unreachable(route);
   }
@@ -942,6 +987,9 @@ export function projectTitle(loadedRoute: ProjectLoadedRoute) {
   } else if (loadedRoute.resource === "project.patches") {
     title.push(loadedRoute.params.project.name);
     title.push("patches");
+  } else if (loadedRoute.resource === "project.board") {
+    title.push(loadedRoute.params.project.name);
+    title.push("board");
   } else {
     return unreachable(loadedRoute);
   }

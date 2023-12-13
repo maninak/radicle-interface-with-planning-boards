@@ -1,5 +1,5 @@
 <script lang="ts" context="module">
-  export type ActiveTab = "source" | "issues" | "patches" | undefined;
+  export type ActiveTab = "source" | "issues" | "patches" | "board" | undefined;
 </script>
 
 <script lang="ts">
@@ -7,9 +7,9 @@
 
   import { pluralize } from "@app/lib/pluralize";
 
-  import Link from "@app/components/Link.svelte";
   import Button from "@app/components/Button.svelte";
   import IconSmall from "@app/components/IconSmall.svelte";
+  import Link from "@app/components/Link.svelte";
   import Radio from "@app/components/Radio.svelte";
 
   export let baseUrl: BaseUrl;
@@ -69,6 +69,18 @@
           {pluralize("patch", project.patches.open)}
           <div></div>
         </div>
+      </Button>
+    </Link>
+
+    <Link
+      route={{
+        resource: "project.board",
+        project: project.id,
+        node: baseUrl,
+      }}>
+      <Button variant={activeTab === "board" ? "secondary" : "background"}>
+        <IconSmall name="globe" />
+        <div>Planning Board</div>
       </Button>
     </Link>
   </Radio>
