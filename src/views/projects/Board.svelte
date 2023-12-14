@@ -4,7 +4,8 @@
 
   import { theme, type Theme } from "@app/lib/appearance";
 
-  const RPB_BASE_URL = "https://chipper-wisp-c7553e.netlify.app";
+  const RPB_BASE_URL =
+    "https://deploy-preview-28--chipper-wisp-c7553e.netlify.app";
 
   interface RPBMessage {
     type: "theme";
@@ -27,7 +28,7 @@
   }
 
   const originalTheme = $theme;
-  $: iFrameSrc = `${RPB_BASE_URL}/${baseUrl.hostname}:${baseUrl.port}/${project.id}?initialTheme=${originalTheme}`;
+  $: iFrameSrc = `${RPB_BASE_URL}/${baseUrl.hostname}:${baseUrl.port}/${project.id}?initialTheme=${originalTheme}&baseUrl=${window.location.origin}`;
 </script>
 
 <style>
