@@ -4,7 +4,7 @@
 
   import { theme, type Theme } from "@app/lib/appearance";
 
-  const RPB_URL = "https://chipper-wisp-c7553e.netlify.app";
+  const RPB_BASE_URL = "https://chipper-wisp-c7553e.netlify.app";
 
   interface RPBMessage {
     type: "theme";
@@ -15,17 +15,19 @@
   export let project: Project;
   export let seeding: boolean;
 
+  let iFrameSrc: string;
   let iFrame: HTMLIFrameElement;
   let isIFrameLoading = true;
 
   $: {
     iFrame?.contentWindow?.postMessage(
       { type: "theme", theme: $theme } satisfies RPBMessage,
-      RPB_URL,
+      RPB_BASE_URL,
     );
   }
 
   const originalTheme = $theme;
+  $: iFrameSrc = `${RPB_BASE_URL}/${baseUrl.hostname}:${baseUrl.port}/${project.id}?initialTheme=${originalTheme}`;
 </script>
 
 <style>
@@ -39,7 +41,7 @@
     <iframe
       bind:this={iFrame}
       title="Planning Board"
-      src="{RPB_URL}/?initialTheme={originalTheme}"
+      src={iFrameSrc}
       width="100%"
       height="100%"
       frameborder="0"
