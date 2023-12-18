@@ -27,7 +27,14 @@
   }
 
   const originalTheme = $theme;
-  $: iFrameSrc = `${RPB_BASE_URL}/${baseUrl.hostname}:${baseUrl.port}/${project.id}?initialTheme=${originalTheme}`;
+
+  $: {
+    const url = new URL(RPB_BASE_URL);
+    url.pathname = `${baseUrl.hostname}:${baseUrl.port}/${project.id}`;
+    url.searchParams.set("initialTheme", originalTheme);
+    url.searchParams.set("baseUrl", window.location.origin);
+    iFrameSrc = url.toString();
+  }
 </script>
 
 <style>
