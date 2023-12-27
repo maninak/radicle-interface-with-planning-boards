@@ -8,7 +8,8 @@
 
   import { theme, type Theme } from "@app/lib/appearance";
 
-  const RPB_ORIGIN = "https://chipper-wisp-c7553e.netlify.app";
+  const RPB_ORIGIN =
+    "https://deploy-preview-35--chipper-wisp-c7553e.netlify.app";
 
   type RPBOutgoingMessage =
     | {
