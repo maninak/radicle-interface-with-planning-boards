@@ -1,5 +1,6 @@
 <script lang="ts">
   import { httpdStore } from "@app/lib/httpd";
+  import * as role from "@app/lib/roles";
   import * as utils from "@app/lib/utils";
   import type { BaseUrl, Project } from "@httpd-client";
   import z from "zod";
@@ -76,6 +77,10 @@
     url.pathname = `${baseUrl.hostname}:${baseUrl.port}/${project.id}`;
     url.searchParams.set("initialTheme", originalTheme);
     url.searchParams.set("baseUrl", window.location.origin);
+    url.searchParams.set(
+      "canEditLabels",
+      (!!role.isDelegate(session?.publicKey, project.delegates)).toString(),
+    );
     iFrameSrc = url.toString();
   }
 </script>
