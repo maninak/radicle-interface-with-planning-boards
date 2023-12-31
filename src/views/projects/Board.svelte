@@ -105,7 +105,8 @@
       style:visibility={hasIFrameLoaded ? "visible" : "hidden"}
       on:load={() => {
         hasIFrameLoaded = true;
-      }}>
+      }}
+      allow="clipboard-read; clipboard-write">
     </iframe>
   </div>
 </Layout>
