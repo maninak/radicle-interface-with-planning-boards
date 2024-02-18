@@ -84,6 +84,16 @@
       }}>
       Patches
     </Link>
+  {:else if activeRoute.resource === "project.board"}
+    <Separator />
+    <Link
+      route={{
+        resource: "project.board",
+        project: activeRoute.params.project.id,
+        node: activeRoute.params.baseUrl,
+      }}>
+      Planning Board
+    </Link>
   {:else if activeRoute.resource === "project.source"}
     {#if activeRoute.params.path !== "/"}
       <Separator />

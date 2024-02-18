@@ -123,7 +123,8 @@ function setTitle(loadedRoute: LoadedRoute) {
     loadedRoute.resource === "project.issues" ||
     loadedRoute.resource === "project.newIssue" ||
     loadedRoute.resource === "project.patches" ||
-    loadedRoute.resource === "project.patch"
+    loadedRoute.resource === "project.patch" ||
+    loadedRoute.resource === "project.board"
   ) {
     title.push(...projectTitle(loadedRoute));
   } else if (loadedRoute.resource === "nodes") {
@@ -244,7 +245,8 @@ export function routeToPath(route: Route): string {
     route.resource === "project.newIssue" ||
     route.resource === "project.issue" ||
     route.resource === "project.patches" ||
-    route.resource === "project.patch"
+    route.resource === "project.patch" ||
+    route.resource === "project.board"
   ) {
     return projectRouteToPath(route);
   } else if (

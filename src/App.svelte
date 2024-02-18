@@ -23,6 +23,7 @@
   import Patches from "@app/views/projects/Patches.svelte";
   import Session from "@app/views/session/Index.svelte";
   import Source from "@app/views/projects/Source.svelte";
+  import Board from "@app/views/projects/Board.svelte";
 
   import Error from "@app/views/error/View.svelte";
   import Loading from "@app/components/Loading.svelte";
@@ -84,6 +85,8 @@
   <Patches {...$activeRouteStore.params} />
 {:else if $activeRouteStore.resource === "project.patch"}
   <Patch {...$activeRouteStore.params} />
+{:else if $activeRouteStore.resource === "project.board"}
+  <Board {...$activeRouteStore.params} />
 {:else if $activeRouteStore.resource === "error"}
   <Error {...$activeRouteStore.params} />
 {:else if $activeRouteStore.resource === "notFound"}

@@ -78,7 +78,8 @@ export async function loadRoute(
     route.resource === "project.newIssue" ||
     route.resource === "project.issue" ||
     route.resource === "project.patches" ||
-    route.resource === "project.patch"
+    route.resource === "project.patch" ||
+    route.resource === "project.board"
   ) {
     return await loadProjectRoute(route, previousLoaded);
   } else {

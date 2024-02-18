@@ -126,6 +126,22 @@
           </Button>
         </Link>
       </div>
+
+      <div style:width="100%">
+        <Link
+          title="Planning Board"
+          route={{
+            resource: "project.board",
+            project: project.id,
+            node: baseUrl,
+          }}>
+          <Button
+            variant={activeTab === "board" ? "secondary" : "secondary-mobile"}
+            styleWidth="100%">
+            <IconSmall name="issue" />
+          </Button>
+        </Link>
+      </div>
     </MobileFooter>
   </div>
 </div>

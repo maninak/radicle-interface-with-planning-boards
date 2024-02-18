@@ -256,6 +256,24 @@
         </div>
       </Button>
     </Link>
+
+    <Link
+      title="Planning Board"
+      route={{
+        resource: "project.board",
+        project: project.id,
+        node: baseUrl,
+      }}>
+      <Button
+        stylePadding="0.5rem 0.75rem"
+        size="large"
+        styleWidth="100%"
+        styleJustifyContent={"flex-start"}
+        variant={activeTab === "board" ? "gray" : "background"}>
+        <IconSmall name="issue" />
+        <div class="title-counter" class:expanded>Planning Board</div>
+      </Button>
+    </Link>
   </div>
   <div class="bottom">
     <div class="help" class:expanded>

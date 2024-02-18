@@ -1,5 +1,5 @@
 <script lang="ts" context="module">
-  export type ActiveTab = "source" | "issues" | "patches" | undefined;
+  export type ActiveTab = "source" | "issues" | "patches" | "board" | undefined;
 </script>
 
 <script lang="ts">

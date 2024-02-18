@@ -52,7 +52,8 @@ export type ProjectRoute =
       issue: string;
     }
   | ProjectPatchesRoute
-  | ProjectPatchRoute;
+  | ProjectPatchRoute
+  | ProjectBoardRoute;
 
 interface ProjectIssuesRoute {
   resource: "project.issues";
@@ -104,6 +105,12 @@ interface ProjectPatchesRoute {
   node: BaseUrl;
   project: string;
   search?: string;
+}
+
+interface ProjectBoardRoute {
+  resource: "project.board";
+  node: BaseUrl;
+  project: string;
 }
 
 export type ProjectLoadedRoute =
@@ -189,6 +196,13 @@ export type ProjectLoadedRoute =
         rawPath: (commit?: string) => string;
         patch: Patch;
         view: PatchView;
+      };
+    }
+  | {
+      resource: "project.board";
+      params: {
+        baseUrl: BaseUrl;
+        project: Project;
       };
     };
 
@@ -320,12 +334,29 @@ export async function loadProjectRoute(
       };
     } else if (route.resource === "project.patches") {
       return await loadPatchesView(route);
+    } else if (route.resource === "project.board") {
+      return await loadBoardView(route);
     } else {
       return unreachable(route);
     }
   } catch (error: any) {
     return handleError(error, route);
   }
+}
+
+async function loadBoardView(
+  route: ProjectBoardRoute,
+): Promise<ProjectLoadedRoute> {
+  const api = new HttpdClient(route.node);
+  const project = await api.project.getById(route.project);
+
+  return {
+    resource: "project.board",
+    params: {
+      baseUrl: route.node,
+      project,
+    },
+  };
 }
 
 async function loadPatchesView(
@@ -743,6 +774,12 @@ export function resolveProjectRoute(
     }
   } else if (content === "patches") {
     return resolvePatchesRoute(node, project, segments, urlSearch);
+  } else if (content === "board") {
+    return {
+      resource: "project.board",
+      node,
+      project,
+    };
   } else {
     return null;
   }
@@ -866,6 +903,8 @@ export function projectRouteToPath(route: ProjectRoute): string {
     return url;
   } else if (route.resource === "project.patch") {
     return patchRouteToPath(route);
+  } else if (route.resource === "project.board") {
+    return [...pathSegments, "board"].join("/");
   } else {
     return unreachable(route);
   }
@@ -930,6 +969,9 @@ export function projectTitle(loadedRoute: ProjectLoadedRoute) {
   } else if (loadedRoute.resource === "project.patches") {
     title.push(loadedRoute.params.project.name);
     title.push("patches");
+  } else if (loadedRoute.resource === "project.board") {
+    title.push(loadedRoute.params.project.name);
+    title.push("planning board");
   } else {
     return unreachable(loadedRoute);
   }
