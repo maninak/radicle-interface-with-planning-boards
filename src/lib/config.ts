@@ -14,6 +14,13 @@ export interface Config {
   };
   supportWebsite: string;
   fallbackPreferredSeed: BaseUrl;
+  plugins?: Record<
+    string,
+    {
+      enabled: boolean;
+      [key: string]: unknown;
+    }
+  >;
 }
 
 function getConfig(): Config {

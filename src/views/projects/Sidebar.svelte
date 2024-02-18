@@ -6,6 +6,7 @@
   import { queryProject } from "@app/lib/projects";
   import { httpdStore, api } from "@app/lib/httpd";
   import { isLocal } from "@app/lib/utils";
+  import { config } from "@app/lib/config";
   import { onMount } from "svelte";
 
   import Button from "@app/components/Button.svelte";
@@ -257,23 +258,25 @@
       </Button>
     </Link>
 
-    <Link
-      title="Planning Board"
-      route={{
-        resource: "project.board",
-        project: project.id,
-        node: baseUrl,
-      }}>
-      <Button
-        stylePadding="0.5rem 0.75rem"
-        size="large"
-        styleWidth="100%"
-        styleJustifyContent={"flex-start"}
-        variant={activeTab === "board" ? "gray" : "background"}>
-        <IconSmall name="issue" />
-        <div class="title-counter" class:expanded>Planning Board</div>
-      </Button>
-    </Link>
+    {#if config?.plugins?.radiclePlanningBoards?.enabled}
+      <Link
+        title="Planning Board"
+        route={{
+          resource: "project.board",
+          project: project.id,
+          node: baseUrl,
+        }}>
+        <Button
+          stylePadding="0.5rem 0.75rem"
+          size="large"
+          styleWidth="100%"
+          styleJustifyContent={"flex-start"}
+          variant={activeTab === "board" ? "gray" : "background"}>
+          <IconSmall name="issue" />
+          <div class="title-counter" class:expanded>Planning Board</div>
+        </Button>
+      </Link>
+    {/if}
   </div>
   <div class="bottom">
     <div class="help" class:expanded>

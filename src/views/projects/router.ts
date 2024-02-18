@@ -335,6 +335,13 @@ export async function loadProjectRoute(
     } else if (route.resource === "project.patches") {
       return await loadPatchesView(route);
     } else if (route.resource === "project.board") {
+      if (!config?.plugins?.radiclePlanningBoards?.enabled) {
+        return {
+          resource: "notFound",
+          params: { title: "Page not found" },
+        };
+      }
+
       return await loadBoardView(route);
     } else {
       return unreachable(route);

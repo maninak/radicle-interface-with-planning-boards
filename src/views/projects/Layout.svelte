@@ -2,6 +2,8 @@
   import type { ActiveTab } from "./Header.svelte";
   import type { BaseUrl, Project } from "@httpd-client";
 
+  import { config } from "@app/lib/config";
+
   import AppHeader from "@app/App/Header.svelte";
 
   import Button from "@app/components/Button.svelte";
@@ -127,21 +129,23 @@
         </Link>
       </div>
 
-      <div style:width="100%">
-        <Link
-          title="Planning Board"
-          route={{
-            resource: "project.board",
-            project: project.id,
-            node: baseUrl,
-          }}>
-          <Button
-            variant={activeTab === "board" ? "secondary" : "secondary-mobile"}
-            styleWidth="100%">
-            <IconSmall name="issue" />
-          </Button>
-        </Link>
-      </div>
+      {#if config?.plugins?.radiclePlanningBoards?.enabled}
+        <div style:width="100%">
+          <Link
+            title="Planning Board"
+            route={{
+              resource: "project.board",
+              project: project.id,
+              node: baseUrl,
+            }}>
+            <Button
+              variant={activeTab === "board" ? "secondary" : "secondary-mobile"}
+              styleWidth="100%">
+              <IconSmall name="issue" />
+            </Button>
+          </Link>
+        </div>
+      {/if}
     </MobileFooter>
   </div>
 </div>
