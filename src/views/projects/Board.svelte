@@ -134,7 +134,10 @@
 
 <Layout {baseUrl} {project} activeTab="board">
   {#if error}
-    <ErrorMessage message="Couldn't load planning board" {error} />
+    <ErrorMessage
+      title="Invalid configuration"
+      description="Check the configuration for radicle-planning-boards"
+      {error} />
   {:else}
     <iframe
       bind:this={iFrame}
