@@ -141,7 +141,7 @@
             <Button
               variant={activeTab === "board" ? "secondary" : "secondary-mobile"}
               styleWidth="100%">
-              <IconSmall name="issue" />
+              <IconSmall name="columns" />
             </Button>
           </Link>
         </div>

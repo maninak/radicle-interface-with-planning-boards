@@ -22,6 +22,7 @@ import type {
 
 import * as Syntax from "@app/lib/syntax";
 import * as httpd from "@app/lib/httpd";
+import config from "@app/config.json";
 import { HttpdClient } from "@httpd-client";
 import { ResponseError } from "@httpd-client/lib/fetcher";
 import { handleError } from "@app/views/projects/error";

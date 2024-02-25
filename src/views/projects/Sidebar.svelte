@@ -272,7 +272,7 @@
           styleWidth="100%"
           styleJustifyContent={"flex-start"}
           variant={activeTab === "board" ? "gray" : "background"}>
-          <IconSmall name="issue" />
+          <IconSmall name="columns" />
           <div class="title-counter" class:expanded>Planning Board</div>
         </Button>
       </Link>
