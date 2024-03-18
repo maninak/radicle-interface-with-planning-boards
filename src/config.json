@@ -22,5 +22,11 @@
     "hostname": "seed.radicle.garden",
     "port": 443,
     "scheme": "https"
+  },
+  "plugins": {
+    "radiclePlanningBoards": {
+      "enabled": true,
+      "origin": "https://chipper-wisp-c7553e.netlify.app"
+    }
   }
 }
