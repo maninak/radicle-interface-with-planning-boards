@@ -53,6 +53,7 @@
     .content {
       overflow-y: scroll;
       overflow-x: hidden;
+      grid-row: 1 / 3;
     }
     .mobile-footer {
       margin-top: auto;
