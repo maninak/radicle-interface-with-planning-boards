@@ -432,7 +432,7 @@
   .connector {
     width: 1px;
     height: 1.5rem;
-    margin-left: 1rem;
+    margin-left: 1.25rem;
     background-color: var(--color-fill-separator);
   }
   .metadata {
@@ -545,7 +545,7 @@
             </Badge>
           {/if}
         </svelte:fragment>
-        <div slot="description">
+        <svelte:fragment slot="description">
           {#if $experimental && issueState !== "read"}
             <ExtendedTextarea
               isValid={() => newTitle.length > 0}
@@ -607,7 +607,7 @@
                   partial(reactOnComment, session, issue.id)} />
             {/if}
           </div>
-        </div>
+        </svelte:fragment>
         <div class="author" slot="author">
           <NodeId nodeId={issue.author.id} alias={issue.author.alias} />
           opened
@@ -634,7 +634,7 @@
         {#if threads.length > 0}
           <div class="connector" />
           <div class="threads">
-            {#each threads as thread (thread.root.id)}
+            {#each threads as thread, i (thread.root.id)}
               <ThreadComponent
                 enableAttachments
                 {thread}
@@ -653,13 +653,14 @@
                 reactOnComment={$experimental &&
                   session &&
                   partial(reactOnComment, session)} />
-              <div class="connector" />
+              {#if i < threads.length - 1}
+                <div class="connector" />
+              {/if}
             {/each}
           </div>
         {/if}
         {#if $experimental && session}
-          {#if threads.length === 0}
-            <div class="connector" />{/if}
+          <div class="connector" />
           <CommentToggleInput
             focus
             rawPath={rawPath(project.head)}

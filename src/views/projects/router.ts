@@ -196,6 +196,7 @@ export type ProjectLoadedRoute =
         project: Project;
         rawPath: (commit?: string) => string;
         patch: Patch;
+        stats: Diff["stats"];
         view: PatchView;
       };
     }
@@ -611,6 +612,11 @@ async function loadPatchView(
     api.project.getPatchById(route.project, route.patch),
   ]);
   const latestRevision = patch.revisions[patch.revisions.length - 1];
+  const { diff } = await api.project.getDiff(
+    route.project,
+    latestRevision.base,
+    latestRevision.oid,
+  );
 
   let view: PatchView;
   switch (route.view?.name) {
@@ -662,6 +668,7 @@ async function loadPatchView(
       project,
       rawPath,
       patch,
+      stats: diff.stats,
       view,
     },
   };

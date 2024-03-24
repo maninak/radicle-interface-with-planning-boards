@@ -9,6 +9,8 @@
     | "negative"
     | "positive"
     | "primary"
+    | "foreground-emphasized"
+    | "delegate"
     | "secondary";
   export let round: boolean = false;
   export let style: string | undefined = undefined;
@@ -37,6 +39,14 @@
   .foreground {
     color: var(--color-foreground-match-background);
     background: var(--color-fill-gray);
+  }
+  .foreground-emphasized {
+    background-color: var(--color-fill-counter-emphasized);
+    color: var(--color-foreground-emphasized);
+  }
+  .delegate {
+    color: var(--color-foreground-primary);
+    background: var(--color-fill-delegate);
   }
   .neutral {
     color: var(--color-foreground-contrast);
@@ -112,7 +122,9 @@
   class:medium={size === "medium"}
   class:caution={variant === "caution"}
   class:yellow={variant === "yellow"}
+  class:delegate={variant === "delegate"}
   class:outline={variant === "outline"}
+  class:foreground-emphasized={variant === "foreground-emphasized"}
   class:background={variant === "background"}
   class:foreground={variant === "foreground"}
   class:neutral={variant === "neutral"}

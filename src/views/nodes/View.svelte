@@ -1,5 +1,7 @@
 <script lang="ts">
   import type { BaseUrl, NodeStats, Policy, Scope } from "@httpd-client";
+  import type { ComponentProps } from "svelte";
+  import type { ProjectInfo } from "@app/components/ProjectCard";
 
   import * as router from "@app/lib/router";
   import { api, httpdStore } from "@app/lib/httpd";
@@ -7,12 +9,14 @@
   import { fetchProjectInfos } from "@app/components/ProjectCard";
   import { handleError } from "@app/views/nodes/error";
   import { isDelegate } from "@app/lib/roles";
+  import { onMount } from "svelte";
 
   import AppLayout from "@app/App/AppLayout.svelte";
   import CopyableId from "@app/components/CopyableId.svelte";
-  import ProjectCard from "@app/components/ProjectCard.svelte";
+  import ErrorMessage from "@app/components/ErrorMessage.svelte";
   import Loading from "@app/components/Loading.svelte";
-  import ScopePolicyPopover from "./ScopePolicyPopover.svelte";
+  import ProjectCard from "@app/components/ProjectCard.svelte";
+  import ScopePolicyPopover from "@app/views/nodes/ScopePolicyPopover.svelte";
 
   export let baseUrl: BaseUrl;
   export let nid: string;
@@ -21,6 +25,26 @@
   export let version: string;
   export let policy: Policy | undefined = undefined;
   export let scope: Scope | undefined = undefined;
+
+  let localProjects:
+    | ProjectInfo[]
+    | ComponentProps<ErrorMessage>["error"]
+    | undefined;
+
+  onMount(async () => {
+    localProjects = await fetchProjectInfos(api.baseUrl, {
+      show: "all",
+      perPage: stats.repos.total,
+    }).catch(error => error);
+  });
+
+  function isSeeding(projectId: string) {
+    if (localProjects instanceof Error) {
+      console.error("Not able to fetch local projects", localProjects);
+      return false;
+    }
+    return localProjects?.some(p => p.project.id === projectId) ?? false;
+  }
 
   $: hostname = isLocal(baseUrl.hostname) ? "Local Node" : baseUrl.hostname;
   $: session =
@@ -58,10 +82,6 @@
     align-items: center;
     gap: 0.5rem;
     width: 100%;
-  }
-  .pinned {
-    display: flex;
-    align-items: center;
   }
   .info {
     display: flex;
@@ -125,10 +145,9 @@
       </div>
 
       <div class="subtitle">
-        <div class="pinned txt-semibold">
-          {stats.repos.total} repositories hosted
+        <div class="txt-semibold">
+          {isLocal(baseUrl.hostname) ? "Seeded" : "Pinned"} projects
         </div>
-
         <div class="global-hide-on-mobile" style:margin-left="auto">
           {#if policy && scope}
             <ScopePolicyPopover
@@ -148,14 +167,16 @@
       </div>
 
       <div style:margin-top="1rem">
-        {#await fetchProjectInfos( baseUrl, { show: isLocal(baseUrl.hostname) ? "all" : "pinned" }, )}
+        {#await fetchProjectInfos( baseUrl, { show: isLocal(baseUrl.hostname) ? "all" : "pinned", perPage: stats.repos.total }, )}
           <Loading small center />
         {:then projectInfos}
           <div class="project-grid">
             {#each projectInfos as projectInfo}
               <ProjectCard
                 {projectInfo}
-                isSeeding={false}
+                isSeeding={isLocal(baseUrl.hostname)
+                  ? true
+                  : isSeeding(projectInfo.project.id)}
                 isDelegate={isDelegate(
                   session?.publicKey,
                   projectInfo.project.delegates,

@@ -152,8 +152,9 @@ test("pushing changes while viewing history", async ({ page, peerManager }) => {
   await expect(page).toHaveURL(`${alice.uiUrl()}/${rid}/history`);
   await expect(page.getByRole("link", { name: "Commits 2" })).toBeVisible();
 
-  await expect(page.getByTitle("Change branch")).toHaveText("main");
-  await expect(page.getByTitle("Current HEAD")).toHaveText("516fa74");
+  await expect(page.getByTitle("Change branch")).toHaveText("main Canonical");
+  const branchSelectorCommitButton = page.getByTitle("Current HEAD").first();
+  await expect(branchSelectorCommitButton).toHaveText("516fa74 first change");
 
   await page
     .getByRole("banner")
@@ -181,6 +182,10 @@ test("pushing changes while viewing history", async ({ page, peerManager }) => {
   await expect(page.getByRole("link", { name: "Commits 3" })).toHaveText(
     "Commits 3",
   );
-  await expect(page.getByTitle("Change branch")).toHaveText("main");
-  await expect(page.getByTitle("Current HEAD")).toHaveText("bb9089a");
+  await expect(
+    page.getByRole("button", { name: "main Canonical" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "bb9089a after clicking the" }),
+  ).toBeVisible();
 });

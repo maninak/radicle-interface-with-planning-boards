@@ -40,8 +40,6 @@
   export let rawPath: (commit?: string) => string;
   export let patchId: string;
   export let patchState: PatchState;
-  export let projectHead: string;
-  export let projectDefaultBranch: string;
   export let projectId: string;
   export let revisionBase: string;
   export let revisionId: string;
@@ -52,6 +50,7 @@
   export let revisionAuthor: { id: string; alias?: string | undefined };
   export let revisionDescription: string;
   export let timelines: Timeline[];
+  export let previousRevBase: string | undefined = undefined;
   export let previousRevId: string | undefined = undefined;
   export let previousRevOid: string | undefined = undefined;
   export let first: boolean;
@@ -126,14 +125,15 @@
   let loading: boolean = false;
   let revisionState: State = "read";
 
+  $: fromCommit =
+    previousRevBase !== revisionBase
+      ? revisionBase
+      : previousRevBase ?? revisionBase;
+
   onMount(async () => {
     try {
       loading = true;
-      response = await api.project.getDiff(
-        projectId,
-        revisionBase,
-        revisionOid,
-      );
+      response = await api.project.getDiff(projectId, fromCommit, revisionOid);
     } catch (err: any) {
       error = err;
     } finally {
@@ -145,7 +145,8 @@
 <style>
   .action {
     border-radius: var(--border-radius-small);
-    min-height: 3rem;
+    min-height: 2.5rem;
+    display: flex;
     align-items: center;
   }
   .merge {
@@ -211,17 +212,21 @@
   .patch-header {
     background-color: var(--color-fill-float);
     border-bottom: 1px solid var(--color-fill-separator);
+    border-top: 1px solid var(--color-fill-separator);
     display: flex;
     flex-direction: column;
-    padding-bottom: 1rem;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 2.5rem;
+    padding: 0.5rem 0;
     font-size: var(--font-size-small);
   }
   .authorship-header {
     display: flex;
     align-items: center;
-    min-height: 3.5rem;
+    padding: 0 0.75rem;
+    height: 1.5rem;
     gap: 0.5rem;
-    padding: 0 0.5rem;
     font-size: var(--font-size-small);
   }
   .timestamp {
@@ -240,7 +245,7 @@
     display: flex;
     flex-direction: column;
     font-size: 0.875rem;
-    margin-left: 1rem;
+    margin-left: 1.25rem;
     gap: 0.5rem;
     padding: 1rem 1rem;
     border-left: 1px solid var(--color-fill-separator);
@@ -269,7 +274,7 @@
   .connector {
     width: 1px;
     height: 1.5rem;
-    margin-left: 1rem;
+    margin-left: 1.25rem;
     background-color: var(--color-fill-separator);
   }
 </style>
@@ -292,48 +297,19 @@
           <Loading small />
         {/if}
         {#if response?.diff.stats}
-          {@const { insertions, deletions } = response.diff.stats}
-          <DiffStatBadge {insertions} {deletions} />
-        {/if}
-        {#if previousRevOid}
           <Link
-            title="Compare {utils.formatObjectId(
-              previousRevOid,
-            )}..{utils.formatObjectId(revisionOid)}"
+            title="Compare {utils.formatCommit(
+              fromCommit,
+            )}..{utils.formatCommit(revisionOid)}"
             route={{
               resource: "project.patch",
               project: projectId,
               node: baseUrl,
               patch: patchId,
-              view: {
-                name: "diff",
-                fromCommit: previousRevOid,
-                toCommit: revisionOid,
-              },
+              view: { name: "diff", fromCommit, toCommit: revisionOid },
             }}>
-            <IconButton>
-              <IconSmall name="diff" />
-            </IconButton>
-          </Link>
-        {:else}
-          <Link
-            title="Compare {utils.formatObjectId(
-              projectHead,
-            )}..{utils.formatObjectId(revisionOid)}"
-            route={{
-              resource: "project.patch",
-              project: projectId,
-              node: baseUrl,
-              patch: patchId,
-              view: {
-                name: "diff",
-                fromCommit: projectHead,
-                toCommit: revisionOid,
-              },
-            }}>
-            <IconButton>
-              <IconSmall name="diff" />
-            </IconButton>
+            {@const { insertions, deletions } = response.diff.stats}
+            <DiffStatBadge hoverable {insertions} {deletions} />
           </Link>
         {/if}
         <Popover
@@ -351,12 +327,16 @@
           <DropdownList
             slot="popover"
             items={previousRevOid && previousRevId
-              ? [projectHead, previousRevOid]
-              : [projectHead]}>
+              ? [revisionBase, previousRevOid]
+              : [revisionBase]}>
+            {@const baseMismatch = previousRevBase !== revisionBase}
             <Link
               let:item
+              disabled={item !== revisionBase && baseMismatch}
               slot="item"
-              title="{item}..{revisionOid}"
+              title="Compare {utils.formatCommit(item)}..{utils.formatCommit(
+                revisionOid,
+              )}"
               route={{
                 resource: "project.patch",
                 project: projectId,
@@ -368,20 +348,27 @@
                   toCommit: revisionOid,
                 },
               }}>
-              {#if item === projectHead}
+              {#if item === revisionBase}
                 <DropdownListItem selected={false}>
                   <span class="compare-dropdown-item">
-                    Compare to {projectDefaultBranch}:
+                    Compare to base:
                     <span
                       style:color="var(--color-fill-secondary)"
                       style:font-weight="var(--font-weight-bold)"
                       style:font-family="var(--font-family-monospace)">
-                      {utils.formatObjectId(projectHead)}
+                      {utils.formatObjectId(revisionBase)}
                     </span>
                   </span>
                 </DropdownListItem>
               {:else if previousRevId}
-                <DropdownListItem selected={false}>
+                <DropdownListItem
+                  selected={false}
+                  disabled={baseMismatch}
+                  title={baseMismatch
+                    ? "Previous revision has different base"
+                    : `${utils.formatCommit(item)}..${utils.formatCommit(
+                        revisionOid,
+                      )}`}>
                   <span class="compare-dropdown-item">
                     Compare to previous revision: <span
                       style:color="var(--color-fill-secondary)"
@@ -400,25 +387,34 @@
     {#if expanded}
       <div>
         <div class="patch-header">
-          <div
-            class="authorship-header"
-            style:border-top="1px solid var(--color-fill-separator)">
+          <div class="authorship-header">
             <div style:color={badgeColor(patchState)}>
               <IconSmall name="patch" />
             </div>
-
-            <NodeId nodeId={revisionAuthor.id} alias={revisionAuthor.alias}>
-            </NodeId>
-
+            <NodeId
+              stylePopoverPositionLeft="0"
+              nodeId={revisionAuthor.id}
+              alias={revisionAuthor.alias} />
             {#if patchId === revisionId}
-              opened this patch
+              opened this patch on base
+              <span class="global-oid">
+                {utils.formatObjectId(revisionBase)}
+              </span>
             {:else}
               updated to
               <span class="global-oid">
                 {utils.formatObjectId(revisionId)}
               </span>
+              {#if previousRevBase && previousRevBase !== revisionBase}
+                with base
+                <span class="global-oid">
+                  {utils.formatObjectId(revisionBase)}
+                </span>
+              {/if}
             {/if}
-            <span title={utils.absoluteTimestamp(revisionTimestamp)}>
+            <span
+              class="timestamp"
+              title={utils.absoluteTimestamp(revisionTimestamp)}>
               {utils.formatTimestamp(revisionTimestamp)}
             </span>
             {#if revisionEdits.length > 1 && lastEdit}
@@ -464,7 +460,7 @@
           {:else if revisionDescription && !first}
             <div class="revision-description txt-small">
               <Markdown
-                rawPath={rawPath(projectHead)}
+                rawPath={rawPath(revisionBase)}
                 content={revisionDescription} />
             </div>
           {/if}
@@ -528,7 +524,7 @@
           <Thread
             enableAttachments
             thread={element.inner}
-            rawPath={rawPath(projectHead)}
+            rawPath={rawPath(revisionBase)}
             canEditComment={canEdit}
             {editComment}
             {createReply}
@@ -570,7 +566,7 @@
             class:positive-review={review.verdict === "accept"}
             class:negative-review={review.verdict === "reject"}>
             <CommentComponent
-              rawPath={rawPath(projectHead)}
+              rawPath={rawPath(revisionBase)}
               authorId={author}
               authorAlias={review.author.alias}
               timestamp={review.timestamp}
