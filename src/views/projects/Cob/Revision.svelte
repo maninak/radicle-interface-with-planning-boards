@@ -193,14 +193,14 @@
     font-weight: var(--font-weight-medium);
   }
   .revision-data {
-    gap: 0.75rem;
+    gap: 0.5rem;
     display: flex;
     align-items: center;
     margin-left: auto;
     color: var(--color-foreground-dim);
   }
   .revision-description {
-    margin-left: 2rem;
+    margin-left: 2.75rem;
   }
   .author-metadata {
     color: var(--color-fill-gray);
@@ -224,7 +224,7 @@
   .authorship-header {
     display: flex;
     align-items: center;
-    padding: 0 0.75rem;
+    padding: 0 0.5rem;
     height: 1.5rem;
     gap: 0.5rem;
     font-size: var(--font-size-small);
@@ -237,7 +237,7 @@
     display: flex;
     flex-direction: row;
     align-items: center;
-    padding-left: 2rem;
+    padding-left: 2.5rem;
     gap: 0.5rem;
   }
   .commits {
@@ -247,15 +247,14 @@
     font-size: 0.875rem;
     margin-left: 1.25rem;
     gap: 0.5rem;
-    padding: 1rem 1rem;
+    padding: 1rem 0.5rem 1rem 1rem;
     border-left: 1px solid var(--color-fill-separator);
   }
-
   .commit:last-of-type::after {
     content: "";
     position: absolute;
     left: -18.5px;
-    top: 12px;
+    top: 14px;
     bottom: -1rem;
     border-left: 4px solid var(--color-background-default);
   }
@@ -267,7 +266,7 @@
     width: 4px;
     height: 4px;
     position: absolute;
-    top: 0.5rem;
+    top: 0.625rem;
     left: -18.5px;
     background-color: var(--color-fill-separator);
   }
@@ -388,11 +387,13 @@
       <div>
         <div class="patch-header">
           <div class="authorship-header">
-            <div style:color={badgeColor(patchState)}>
+            <div
+              style:color={badgeColor(patchState)}
+              style:padding="0 0.375rem">
               <IconSmall name="patch" />
             </div>
             <NodeId
-              stylePopoverPositionLeft="0"
+              stylePopoverPositionLeft="-13px"
               nodeId={revisionAuthor.id}
               alias={revisionAuthor.alias} />
             {#if patchId === revisionId}
@@ -460,6 +461,7 @@
           {:else if revisionDescription && !first}
             <div class="revision-description txt-small">
               <Markdown
+                breaks
                 rawPath={rawPath(revisionBase)}
                 content={revisionDescription} />
             </div>
@@ -538,6 +540,7 @@
               </div>
 
               <NodeId
+                stylePopoverPositionLeft="-13px"
                 nodeId={element.inner.author.id}
                 alias={element.inner.author.alias}>
               </NodeId>

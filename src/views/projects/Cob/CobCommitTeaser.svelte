@@ -21,24 +21,27 @@
   .teaser {
     display: flex;
     font-size: var(--font-size-small);
+    align-items: start;
+    padding: 0.125rem 0;
   }
   .message {
     align-items: center;
     display: flex;
-    flex-direction: row;
     flex-wrap: wrap;
     gap: 0.5rem;
   }
   .left {
     display: flex;
-    flex-direction: column;
     gap: 0.5rem;
+    padding: 0 0.5rem;
+    flex-direction: column;
   }
   .right {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     gap: 1rem;
     margin-left: auto;
+    height: 21px;
   }
   .summary:hover {
     text-decoration: underline;
@@ -64,11 +67,13 @@
         </div>
       </Link>
       {#if commit.description}
-        <ExpandButton
-          variant="inline"
-          on:toggle={() => {
-            commitMessageVisible = !commitMessageVisible;
-          }} />
+        <div style="height: 21px; display: flex; align-items: center;">
+          <ExpandButton
+            variant="inline"
+            on:toggle={() => {
+              commitMessageVisible = !commitMessageVisible;
+            }} />
+        </div>
       {/if}
     </div>
     {#if commitMessageVisible}
@@ -78,10 +83,8 @@
     {/if}
   </div>
   <div class="right">
-    <div style:display="flex" style:gap="1rem" style:height="1.5rem">
-      <div style:margin-bottom="1rem">
-        <CompactCommitAuthorship {commit} />
-      </div>
+    <div style="display: flex; gap: 0.5rem; height: 21px; align-items: center;">
+      <CompactCommitAuthorship {commit} />
       <IconButton title="Browse repo at this commit">
         <Link
           route={{

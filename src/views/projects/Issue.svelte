@@ -581,6 +581,7 @@
               }} />
           {:else if issue.discussion[0].body}
             <Markdown
+              breaks
               content={issue.discussion[0].body}
               rawPath={rawPath(project.head)} />
           {:else}
@@ -609,7 +610,10 @@
           </div>
         </svelte:fragment>
         <div class="author" slot="author">
-          <NodeId nodeId={issue.author.id} alias={issue.author.alias} />
+          <NodeId
+            stylePopoverPositionLeft="-13px"
+            nodeId={issue.author.id}
+            alias={issue.author.alias} />
           opened
           <CopyableId id={issue.id} style="oid">
             {utils.formatObjectId(issue.id)}

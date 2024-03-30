@@ -109,7 +109,7 @@
       {#await queryProject(seed.node, seed.project)}
         <li class="seed-item">
           <span class="seed txt-bold">
-            <IconSmall name="globe" />
+            <IconSmall name="seedling" />
             <span class="txt-overflow">
               {seed.node.hostname}/{seed.project}
             </span>
@@ -127,7 +127,7 @@
             ? "Not available on this public seed node"
             : ""}>
           <div class="seed txt-bold">
-            <IconSmall name="globe" />
+            <IconSmall name="seedling" />
             <span class="txt-overflow">
               {path.replace("/nodes/", "")}
             </span>
@@ -175,7 +175,9 @@
           <div class="txt-bold" style:padding-bottom="0.5rem">
             Add more seed nodes
           </div>
-          <div>Update your preferred seeds in your Radicle config.</div>
+          <div>
+            Update preferred seeds in your Radicle config and restart httpd.
+          </div>
         </div>
         <div style="display: flex; gap: 0.5rem; flex-direction: column;">
           <div>Run the following command to locate your config:</div>

@@ -821,7 +821,10 @@
                   }
                 }} />
             {:else if description}
-              <Markdown content={description} rawPath={rawPath(patch.id)} />
+              <Markdown
+                breaks
+                content={description}
+                rawPath={rawPath(patch.id)} />
             {:else}
               <span class="txt-missing">No description available</span>
             {/if}
@@ -856,7 +859,10 @@
           </div>
         </svelte:fragment>
         <div class="author" slot="author">
-          <NodeId nodeId={patch.author.id} alias={patch.author.alias} />
+          <NodeId
+            stylePopoverPositionLeft="-13px"
+            nodeId={patch.author.id}
+            alias={patch.author.alias} />
           opened
           <CopyableId id={patch.id} style="oid">
             {utils.formatObjectId(patch.id)}

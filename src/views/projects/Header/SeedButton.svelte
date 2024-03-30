@@ -6,6 +6,7 @@
   import Button from "@app/components/Button.svelte";
   import Command from "@app/components/Command.svelte";
   import ErrorModal from "@app/modals/ErrorModal.svelte";
+  import ExternalLink from "@app/components/ExternalLink.svelte";
   import IconSmall from "@app/components/IconSmall.svelte";
   import Popover from "@app/components/Popover.svelte";
 
@@ -31,12 +32,12 @@
             component: ErrorModal,
             props: {
               title: seeding
-                ? "Stop seeding project failed"
-                : "Seeding project failed",
+                ? "Stop seeding repository failed"
+                : "Seeding repository failed",
               subtitle: [
                 `There was an error while trying to ${
                   seeding ? "stop seeding" : "seed"
-                } this project.`,
+                } this repository.`,
                 "Check your radicle-httpd logs for details.",
               ],
               error: {
@@ -104,7 +105,7 @@
       }
     }}
     variant={seeding ? "secondary-toggle-on" : "secondary-toggle-off"}>
-    <IconSmall name="network" />
+    <IconSmall name="seedling" />
     <span class="title-counter">
       {seeding ? "Seeding" : "Seed"}
       <span
@@ -124,9 +125,9 @@
     {#if $experimental && canEditSeeding && seeding}
       <div class="seed-label txt-bold">Stop seeding</div>
       <div class="seed-label">
-        Are you sure you want to stop seeding this project? If you don't seed a
-        project it won't appear in the local projects section anymore and any
-        changes you make to it won't propagate to the network.
+        Are you sure you want to stop seeding this repository? If you don't seed
+        a repository it won't appear in the local repositories section anymore
+        and any changes you make to it won't propagate to the network.
       </div>
       <Button
         styleWidth="100%"
@@ -134,12 +135,14 @@
         on:click={async () => {
           await editSeeding();
         }}>
-        <IconSmall name="network" />
+        <IconSmall name="seedling" />
         Stop seeding
       </Button>
     {:else}
       <span class="seed-label">
-        Use the Radicle CLI to {seeding ? "stop" : "start"} seeding this project.
+        Use the <ExternalLink href="https://radicle.xyz">
+          Radicle CLI
+        </ExternalLink> to {seeding ? "stop" : "start"} seeding this repository.
       </span>
       <Command command={`rad ${seeding ? "unseed" : "seed"} ${projectId}`} />
     {/if}

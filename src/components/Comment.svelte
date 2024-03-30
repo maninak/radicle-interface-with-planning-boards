@@ -97,7 +97,7 @@
     align-items: center;
     gap: 0.5rem;
     padding-left: 2.25rem;
-    margin-left: -0.25rem;
+    margin-left: -0.375rem;
   }
   .timestamp {
     font-size: var(--font-size-small);
@@ -134,7 +134,10 @@
     {/if}
     <div class="card-header" class:card-header-no-icon={isReply}>
       <slot class="icon" name="icon" />
-      <NodeId nodeId={authorId} alias={authorAlias} />
+      <NodeId
+        stylePopoverPositionLeft="-13px"
+        nodeId={authorId}
+        alias={authorAlias} />
       <slot name="caption">{caption}</slot>
       <span class="timestamp" title={utils.absoluteTimestamp(timestamp)}>
         {utils.formatTimestamp(timestamp)}
@@ -188,7 +191,7 @@
             state = "read";
           }} />
       {:else}
-        <Markdown {rawPath} content={body} />
+        <Markdown breaks {rawPath} content={body} />
       {/if}
     </div>
   {/if}

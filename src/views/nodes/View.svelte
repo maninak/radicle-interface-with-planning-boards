@@ -98,6 +98,24 @@
     grid-template-columns: repeat(auto-fill, minmax(21rem, 1fr));
     gap: 1rem;
   }
+  .empty-state {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    height: 35vh;
+  }
+  .empty-state .heading {
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-bold);
+  }
+  .empty-state .label {
+    display: block;
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-regular);
+  }
   @media (max-width: 720px) {
     .wrapper {
       width: 100%;
@@ -139,7 +157,7 @@
             {/each}
           </div>
           <div class="version">
-            v{version}
+            {version}
           </div>
         </div>
       </div>
@@ -150,39 +168,44 @@
         </div>
         <div class="global-hide-on-mobile" style:margin-left="auto">
           {#if policy && scope}
-            <ScopePolicyPopover
-              {scope}
-              {policy}
-              stylePopoverPositionRight="-1rem" />
+            <ScopePolicyPopover {scope} {policy} popoverPositionRight="0" />
           {/if}
         </div>
       </div>
       <div class="subtitle global-hide-on-desktop">
         {#if policy && scope}
-          <ScopePolicyPopover
-            {scope}
-            {policy}
-            stylePopoverPositionLeft="-14rem" />
+          <ScopePolicyPopover {scope} {policy} popoverPositionLeft="-5.5rem" />
         {/if}
       </div>
 
       <div style:margin-top="1rem">
         {#await fetchProjectInfos( baseUrl, { show: isLocal(baseUrl.hostname) ? "all" : "pinned", perPage: stats.repos.total }, )}
-          <Loading small center />
-        {:then projectInfos}
-          <div class="project-grid">
-            {#each projectInfos as projectInfo}
-              <ProjectCard
-                {projectInfo}
-                isSeeding={isLocal(baseUrl.hostname)
-                  ? true
-                  : isSeeding(projectInfo.project.id)}
-                isDelegate={isDelegate(
-                  session?.publicKey,
-                  projectInfo.project.delegates,
-                ) ?? false} />
-            {/each}
+          <div style:height="35vh">
+            <Loading small center />
           </div>
+        {:then projectInfos}
+          {#if projectInfos.length > 0}
+            <div class="project-grid">
+              {#each projectInfos as projectInfo}
+                <ProjectCard
+                  {projectInfo}
+                  isSeeding={isLocal(baseUrl.hostname)
+                    ? true
+                    : isSeeding(projectInfo.project.id)}
+                  isDelegate={isDelegate(
+                    session?.publicKey,
+                    projectInfo.project.delegates,
+                  ) ?? false} />
+              {/each}
+            </div>
+          {:else}
+            <div class="empty-state">
+              <div class="heading">No pinned projects</div>
+              <div class="label">
+                This node doesn't have any pinned projects.
+              </div>
+            </div>
+          {/if}
         {:catch error}
           {router.push(handleError(error, baseUrlToString(api.baseUrl)))}
         {/await}

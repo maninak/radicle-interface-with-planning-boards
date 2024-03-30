@@ -19,14 +19,15 @@
   import AppLayout from "@app/App/AppLayout.svelte";
   import ProjectCard from "@app/components/ProjectCard.svelte";
 
+  import Command from "@app/components/Command.svelte";
   import ErrorMessage from "@app/components/ErrorMessage.svelte";
   import FilterButton from "./components/FilterButton.svelte";
   import HomepageSection from "./components/HomepageSection.svelte";
-  import HoverPopover from "@app/components/HoverPopover.svelte";
   import IconSmall from "@app/components/IconSmall.svelte";
   import NewProjectButton from "./components/NewProjectButton.svelte";
+  import Popover from "@app/components/Popover.svelte";
   import PreferredSeedDropdown from "./components/PreferredSeedDropdown.svelte";
-  import Command from "@app/components/Command.svelte";
+  import IconButton from "@app/components/IconButton.svelte";
 
   const selectedSeed = deduplicateStore(
     derived(preferredSeeds, $ => $?.selected),
@@ -205,22 +206,31 @@
         preferredSeedProjects?.length === 0}
       title="Explore">
       <svelte:fragment slot="subtitle">
-        Pinned projects on your selected seed node
+        {#if nodeId && $preferredSeeds}
+          Pinned repositories on your selected seed node
+        {:else}
+          Pinned repositories on {$selectedSeed?.hostname}
+        {/if}
         {#if !nodeId}
-          <HoverPopover stylePopoverPositionTop="0.5rem">
-            <div slot="toggle">
-              <span style:color="var(--color-fill-gray)">
-                <IconSmall name="info" />
-              </span>
-            </div>
+          <div class="global-hide-on-mobile">
+            <Popover
+              popoverPositionTop="1.5rem"
+              popoverPositionLeft="0"
+              popoverPositionRight="-15rem">
+              <IconButton slot="toggle" let:toggle on:click={toggle}>
+                <span style:color="var(--color-fill-gray)">
+                  <IconSmall name="info" />
+                </span>
+              </IconButton>
 
-            <div slot="popover" class="popover txt-small">
-              <div style:padding-bottom="0.5rem">
-                To browse your local projects, run:
+              <div slot="popover" class="popover txt-small">
+                <div style:padding-bottom="0.5rem">
+                  To browse your local projects, run:
+                </div>
+                <Command command="radicle-httpd" />
               </div>
-              <Command command="radicle-httpd" />
-            </div>
-          </HoverPopover>
+            </Popover>
+          </div>
         {/if}
       </svelte:fragment>
       <svelte:fragment slot="actions">
@@ -241,9 +251,9 @@
                 baseUrlToString(api.baseUrl),
               )} />
           {:else}
-            <div class="heading">Nothing to see here</div>
+            <div class="heading">No pinned projects</div>
             <div class="label">
-              Your preferred seed node doesn't have any pinned projects.
+              The selected seed node doesn't have any pinned projects.
             </div>
           {/if}
         </div>
