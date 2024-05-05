@@ -18,6 +18,7 @@ import type {
   Project,
   Remote,
   Tree,
+  TreeStats,
 } from "@httpd-client";
 
 import * as Syntax from "@app/lib/syntax";
@@ -125,6 +126,7 @@ export type ProjectLoadedRoute =
         branches: string[];
         revision: string | undefined;
         tree: Tree;
+        stats: TreeStats;
         path: string;
         rawPath: (commit?: string) => string;
         blobResult: BlobResult;
@@ -141,8 +143,8 @@ export type ProjectLoadedRoute =
         branches: string[];
         revision: string | undefined;
         tree: Tree;
+        stats: TreeStats;
         commitHeaders: CommitHeader[];
-        totalCommitCount: number;
         seeding: boolean;
       };
     }
@@ -482,6 +484,8 @@ async function loadTreeView(
     branchMap,
   );
 
+  const stats = await api.project.getTreeStatsBySha(route.project, commit);
+
   const path = route.path || "/";
 
   const [tree, blobResult] = await Promise.all([
@@ -499,6 +503,7 @@ async function loadTreeView(
       rawPath,
       revision: route.revision,
       tree,
+      stats,
       path,
       blobResult,
       seeding,
@@ -572,8 +577,9 @@ async function loadHistoryView(
     );
   }
 
-  const [tree, commitsResponse, seeding] = await Promise.all([
+  const [tree, stats, commitHeaders, seeding] = await Promise.all([
     api.project.getTree(route.project, commitId),
+    api.project.getTreeStatsBySha(route.project, commitId),
     await api.project.getAllCommits(project.id, {
       parent: commitId,
       page: 0,
@@ -592,8 +598,8 @@ async function loadHistoryView(
       branches: Object.keys(branchMap || {}),
       revision: route.revision,
       tree,
-      commitHeaders: commitsResponse.commits,
-      totalCommitCount: commitsResponse.stats.commits,
+      stats,
+      commitHeaders,
       seeding,
     },
   };

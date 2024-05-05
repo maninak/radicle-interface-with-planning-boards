@@ -6,6 +6,7 @@ import type {
   ProjectListQuery,
   Remote,
   Tree,
+  TreeStats,
 } from "./lib/project.js";
 import type {
   SuccessResponse,
@@ -82,6 +83,7 @@ export type {
   Review,
   Revision,
   Scope,
+  TreeStats,
   Tree,
   Verdict,
 };
@@ -101,6 +103,7 @@ const nodeInfoSchema = object({
   message: string(),
   service: string(),
   version: string(),
+  apiVersion: string(),
   nid: string(),
   path: string(),
   links: array(

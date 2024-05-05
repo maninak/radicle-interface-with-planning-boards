@@ -77,6 +77,7 @@ export const test = base.extend<{
             nodes: {
               fallbackPublicExplorer:
                 "https://app.radicle.xyz/nodes/$host/$rid$path",
+              apiVersion: "0.1.0",
               defaultHttpdPort: 8081,
               defaultHttpdHostname: "127.0.0.1",
               defaultLocalHttpdPort: 8081,
@@ -214,6 +215,7 @@ export function appConfigWithFixture(defaultLocalHttpdPort = 8081) {
   window.APP_CONFIG = {
     nodes: {
       fallbackPublicExplorer: "https://app.radicle.xyz/nodes/$host/$rid$path",
+      apiVersion: "0.1.0",
       defaultHttpdPort: 8081,
       defaultHttpdHostname: "127.0.0.1",
       defaultLocalHttpdPort,
@@ -659,7 +661,7 @@ export const aliceRemote =
   "did:key:z6MkqGC3nWZhYieEVTVDKW5v588CiGfsDSmRVG9ZwwWTvLSK";
 export const bobRemote =
   "did:key:z6Mkg49NtQR2LyYRDCQFK4w1VVHqhypZSSRo7HsyuN7SV7v5";
-export const bobHead = "ff32f18dc09d82bff329ffcd96fd5eba2d7f826c";
+export const bobHead = "79b0b2522c0d406d398cb5b7b381455294e1489f";
 export const shortBobHead = formatCommit(bobHead);
 export const sourceBrowsingRid = "rad:z4BwwjPCFNVP27FwVbDFgwVwkjcir";
 export const cobRid = "rad:z3fpY7nttPPa6MBnAv2DccHzQJnqe";
@@ -685,6 +687,6 @@ export const gitOptions = {
     GIT_AUTHOR_DATE: "1671125284",
     GIT_COMMITTER_NAME: "Bob Belcher",
     GIT_COMMITTER_EMAIL: "bob@radicle.xyz",
-    GIT_COMMITTER_DATE: "Mon Dec 21 14:00 2022 +0100",
+    GIT_COMMITTER_DATE: "1671627600",
   },
 };

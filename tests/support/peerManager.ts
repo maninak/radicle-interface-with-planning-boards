@@ -16,7 +16,7 @@ import * as readline from "node:readline/promises";
 import * as Process from "./process.js";
 import { randomTag } from "@tests/support/support.js";
 import { sleep } from "@app/lib/sleep.js";
-import { array, boolean, literal, number, object, string, union, z } from "zod";
+import { array, literal, number, object, string, union, z } from "zod";
 import { logPrefix } from "./logPrefix.js";
 
 export type RefsUpdate =
@@ -132,7 +132,7 @@ export const NodeConfigSchema = object({
     connect: array(string()),
     externalAddresses: array(string()),
     network: union([literal("main"), literal("test")]),
-    relay: boolean(),
+    relay: union([literal("always"), literal("never"), literal("auto")]),
     limits: object({
       routingMaxSize: number(),
       routingMaxAge: number(),
@@ -238,7 +238,7 @@ export class RadiclePeer {
       ...gitOptions,
       RAD_HOME: radHome,
       RAD_PASSPHRASE: "asdf",
-      RAD_SEED: node,
+      RAD_KEYGEN_SEED: node,
       RAD_SOCKET: socket,
     };
 
@@ -412,8 +412,8 @@ export class RadiclePeer {
         GIT_CONFIG_NOSYSTEM: "1",
         RAD_HOME: this.#radHome,
         RAD_PASSPHRASE: "asdf",
-        RAD_COMMIT_TIME: "1671125284",
-        RAD_SEED: this.#radSeed,
+        RAD_LOCAL_TIME: "1671125284",
+        RAD_KEYGEN_SEED: this.#radSeed,
         RAD_SOCKET: this.#socket,
         ...opts?.env,
         ...this.#gitOptions,

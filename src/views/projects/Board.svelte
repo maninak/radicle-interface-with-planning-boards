@@ -50,6 +50,7 @@
     $httpdStore.state === "authenticated" && utils.isLocal(baseUrl.hostname)
       ? $httpdStore.session
       : undefined;
+  $: delegates = project.delegates.map(d => d.id);
 
   function postMessage(message: OutgoingMessage) {
     if (!rpbConfig) {
@@ -90,7 +91,7 @@
       url.searchParams.set("baseUrl", window.location.origin);
       url.searchParams.set(
         "canEditLabels",
-        (!!role.isDelegate(session?.publicKey, project.delegates)).toString(),
+        (!!role.isDelegate(session?.publicKey, delegates)).toString(),
       );
       iFrameSrc = url.toString();
     } catch (e) {

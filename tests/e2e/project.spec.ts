@@ -3,6 +3,7 @@ import {
   cobUrl,
   expect,
   markdownUrl,
+  shortBobHead,
   sourceBrowsingRid,
   sourceBrowsingUrl,
   test,
@@ -362,7 +363,9 @@ test("peer and branch switching", async ({ page }) => {
     {
       await expect(page.getByRole("button", { name: "main" })).toBeVisible();
       await expect(
-        page.getByRole("button", { name: "ff32f18 Update readme" }).first(),
+        page
+          .getByRole("button", { name: `${shortBobHead} Update readme` })
+          .first(),
       ).toBeVisible();
       await expect(
         page.getByRole("link", {
@@ -370,7 +373,9 @@ test("peer and branch switching", async ({ page }) => {
         }),
       ).toBeVisible();
       await expect(
-        page.getByRole("button", { name: "ff32f18 Update readme" }).first(),
+        page
+          .getByRole("button", { name: `${shortBobHead} Update readme` })
+          .first(),
       ).toBeVisible();
     }
   }
@@ -414,7 +419,10 @@ test("only one modal can be open at a time", async ({ page }) => {
 test.describe("browser error handling", () => {
   test("error appears when folder can't be loaded", async ({ page }) => {
     await page.route(
-      `**/v1/projects/${sourceBrowsingRid}/tree/${aliceMainHead}/src/`,
+      ({ pathname }) =>
+        pathname.startsWith(
+          `/api/v1/projects/${sourceBrowsingRid}/tree/${aliceMainHead}/src`,
+        ),
       route => route.fulfill({ status: 500 }),
     );
 
@@ -427,7 +435,9 @@ test.describe("browser error handling", () => {
   });
   test("error appears when file can't be loaded", async ({ page }) => {
     await page.route(
-      `**/v1/projects/${sourceBrowsingRid}/blob/${aliceMainHead}/.hidden`,
+      ({ pathname }) =>
+        pathname ===
+        `/api/v1/projects/${sourceBrowsingRid}/blob/${aliceMainHead}/.hidden`,
       route => route.fulfill({ status: 500 }),
     );
 
@@ -438,7 +448,9 @@ test.describe("browser error handling", () => {
   });
   test("error appears when README can't be loaded", async ({ page }) => {
     await page.route(
-      `**/v1/projects/${sourceBrowsingRid}/readme/${aliceMainHead}`,
+      ({ pathname }) =>
+        pathname ===
+        `/api/v1/projects/${sourceBrowsingRid}/readme/${aliceMainHead}`,
       route => route.fulfill({ status: 500 }),
     );
 
@@ -447,7 +459,9 @@ test.describe("browser error handling", () => {
   });
   test("error appears when navigating to missing file", async ({ page }) => {
     await page.route(
-      `**/v1/projects/${sourceBrowsingRid}/blob/${aliceMainHead}/.hidden`,
+      ({ pathname }) =>
+        pathname ===
+        `/api/v1/projects/${sourceBrowsingRid}/blob/${aliceMainHead}/.hidden`,
       route => route.fulfill({ status: 500 }),
     );
 
