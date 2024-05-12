@@ -22,3 +22,6 @@ tests/visual/snapshots/**/*
 # IDEs and Editors
 .idea
 .vscode
+
+# Local Files
+*.local

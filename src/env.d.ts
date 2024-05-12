@@ -9,5 +9,9 @@ interface ImportMeta extends Readonly<Record<string, unknown>> {
     PROD: boolean;
     DEV: boolean;
     SSR: boolean;
+    VITE_CONFIG_NODES?: string;
+    VITE_CONFIG_SUPPORT_WEBSITE?: string;
+    VITE_CONFIG_FALLBACK_PREFERRED_SEED?: string;
+    VITE_CONFIG_PLUGINS?: string;
   };
 }
