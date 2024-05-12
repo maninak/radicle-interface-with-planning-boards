@@ -214,7 +214,7 @@
     scroll-padding-top: 4rem;
   }
   .markdown {
-    max-width: 1024px;
+    word-break: break-word;
   }
   .front-matter {
     font-size: var(--font-size-tiny);

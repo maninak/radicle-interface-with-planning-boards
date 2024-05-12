@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { api, changeHttpdPort } from "@app/lib/httpd";
+  import { config } from "@app/lib/config";
   import {
     codeFont,
     codeFonts,
@@ -12,11 +14,13 @@
   import Icon from "@app/components/Icon.svelte";
   import Radio from "@app/components/Radio.svelte";
   import Button from "@app/components/Button.svelte";
+  import TextInput from "@app/components/TextInput.svelte";
+
+  $: customPort = api.port;
 </script>
 
 <style>
   .settings {
-    width: 24rem;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -28,6 +32,8 @@
     display: flex;
     width: 100%;
     align-items: center;
+    gap: 2rem;
+    white-space: nowrap;
   }
 
   .right {
@@ -78,7 +84,7 @@
       </Radio>
     </div>
   </div>
-  <div class="item">
+  <div class="item global-hide-on-mobile-down">
     <div
       style="display: flex; flex-direction: row; align-items: center; gap: 0.5rem;">
       Make changes on the web (experimental)
@@ -101,6 +107,17 @@
           </Button>
         </Radio>
       </Radio>
+    </div>
+  </div>
+  <div class="item">
+    <div>Radicle HTTP Daemon Port</div>
+    <div class="right txt-monospace" style:width="6rem">
+      <TextInput
+        name="httpd port"
+        bind:value={customPort}
+        placeholder={config.nodes.defaultLocalHttpdPort.toString()}
+        valid={Number(customPort) >= 1 && Number(customPort) <= 65535}
+        on:submit={() => changeHttpdPort(Number(customPort))} />
     </div>
   </div>
 </div>

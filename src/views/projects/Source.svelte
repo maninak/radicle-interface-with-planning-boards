@@ -1,11 +1,5 @@
 <script lang="ts">
-  import type {
-    BaseUrl,
-    Project,
-    Remote,
-    Tree,
-    TreeStats,
-  } from "@httpd-client";
+  import type { BaseUrl, Project, Remote, Tree } from "@httpd-client";
   import type { BlobResult } from "./router";
   import type { Route } from "@app/lib/router";
 
@@ -21,6 +15,7 @@
   import ProjectNameHeader from "./Source/ProjectNameHeader.svelte";
 
   export let baseUrl: BaseUrl;
+  export let commit: string;
   export let rawPath: (commit?: string) => string;
   export let blobResult: BlobResult;
   export let branches: string[];
@@ -30,7 +25,6 @@
   export let project: Project;
   export let revision: string | undefined;
   export let tree: Tree;
-  export let stats: TreeStats;
   export let seeding: boolean;
 
   let mobileFileTree = false;
@@ -99,6 +93,9 @@
     display: flex;
     flex-direction: column;
     width: 100%;
+    padding-bottom: 2.5rem;
+    max-width: 75rem;
+    margin: 0 auto;
     /* To allow pre elements to shrink when overflowing */
     min-width: 0;
   }
@@ -119,24 +116,31 @@
     top: 0rem;
     max-height: calc(100vh - 5.5rem);
   }
+  @media (max-width: 719.98px) {
+    .container {
+      display: flex;
+      width: inherit;
+      padding: 0;
+    }
+  }
 </style>
 
-<Layout {baseUrl} {project} activeTab="source">
+<Layout {baseUrl} {project} activeTab="source" stylePaddingBottom="0">
   <ProjectNameHeader {project} {baseUrl} {seeding} slot="header" />
 
   <div style:margin="1rem 0 1rem 1rem" slot="subheader">
     <Header
       node={baseUrl}
+      {commit}
       {project}
       peers={peersWithRoute}
       branches={branchesWithRoute}
       {revision}
       {tree}
-      {stats}
       filesLinkActive={true}
       historyLinkActive={false} />
   </div>
-  <div class="global-hide-on-desktop">
+  <div class="global-hide-on-medium-desktop-up">
     {#if tree.entries.length > 0}
       <div style:margin="1rem">
         <Button
@@ -170,7 +174,7 @@
 
   <div class="container center-content">
     {#if tree.entries.length > 0}
-      <div class="column-left global-hide-on-mobile">
+      <div class="column-left global-hide-on-small-desktop-down">
         <div class="source-tree sticky">
           <TreeComponent
             projectId={project.id}

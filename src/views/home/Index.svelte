@@ -130,8 +130,20 @@
     grid-template-columns: repeat(auto-fill, minmax(21rem, 1fr));
     gap: 1rem;
   }
+  .seed {
+    max-width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 0.125rem;
+    color: var(--color-foreground-contrast);
+  }
+  .seed-name {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 
-  @media (max-width: 720px) {
+  @media (max-width: 719.98px) {
     .wrapper {
       width: 100%;
       padding: 1rem;
@@ -144,9 +156,9 @@
 </style>
 
 <AppLayout>
-  <div class="wrapper">
+  <div class="wrapper" style:padding-bottom="2.5rem">
     {#if nodeId}
-      <div class="global-hide-on-mobile">
+      <div class="global-hide-on-mobile-down">
         <HomepageSection
           loading={$httpdStore.state !== "stopped" &&
             localProjects === undefined}
@@ -214,21 +226,24 @@
         {#if nodeId && $preferredSeeds}
           Pinned repositories on your selected seed node
         {:else}
-          Pinned repositories on {$selectedSeed?.hostname}
+          Pinned repositories on
+          <div class="seed">
+            <IconSmall name="seedling" />
+            <span class="seed-name">
+              {$selectedSeed?.hostname}
+            </span>
+          </div>
         {/if}
         {#if !nodeId}
-          <div class="global-hide-on-mobile">
-            <Popover
-              popoverPositionTop="1.5rem"
-              popoverPositionLeft="0"
-              popoverPositionRight="-15rem">
+          <div class="global-hide-on-mobile-down">
+            <Popover popoverPositionTop="2.5rem" popoverPositionLeft="0">
               <IconButton slot="toggle" let:toggle on:click={toggle}>
                 <span style:color="var(--color-fill-gray)">
                   <IconSmall name="info" />
                 </span>
               </IconButton>
 
-              <div slot="popover" class="popover txt-small">
+              <div slot="popover" class="popover txt-small" style:width="15rem">
                 <div style:padding-bottom="0.5rem">
                   To browse your local projects, run:
                 </div>
