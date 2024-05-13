@@ -40,6 +40,15 @@ There are several ways to deploy the UI publicly. Here are two common options:
 1. Fork this repository to create your own version
 2. Configure your Vercel account to deploy the forked repository
 
+**In a container, using docker-compose:** 
+
+1. Use the provided `Containerfile` to build a container image, using, e.g. 
+   `podman build .`
+1. Or, if you want to deploy using the provided docker-compose.yaml file, 
+   just run `docker-compose build && docker-compose up`. You should then be 
+   able to open http://localhost:3080 in your favourite browser.
+
+
 ## Configuration
 
 There's two ways to configure the UI:

@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  caddy:
+    build:
+      dockerfile: ./Containerfile
+      context: .
+    ports:
+      - "3080:80"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+
+volumes:
+  caddy_data:
