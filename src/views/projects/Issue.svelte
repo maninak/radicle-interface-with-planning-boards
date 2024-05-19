@@ -430,7 +430,7 @@
     background-color: var(--color-background-float);
   }
   .bottom {
-    padding: 0 1rem 1rem 1rem;
+    padding: 0 1rem 2.5rem 1rem;
     background-color: var(--color-background-default);
     height: 100%;
     border-top: 1px solid var(--color-border-hint);
@@ -467,6 +467,7 @@
     gap: 0.5rem;
     font-weight: var(--font-weight-semibold);
     font-size: var(--font-size-large);
+    word-break: break-word;
   }
   .reactions {
     display: flex;
@@ -481,7 +482,7 @@
   }
 </style>
 
-<Layout {baseUrl} {project} activeTab="issues">
+<Layout {baseUrl} {project} activeTab="issues" stylePaddingBottom="0">
   <div class="issue">
     <div class="main">
       <CobHeader>
@@ -504,7 +505,7 @@
             {/if}
           </div>
           <div style="display: flex; gap: 0.5rem;">
-            {#if session && role.isDelegateOrAuthor(session.publicKey, delegates, issue.author.id) && issueState === "read"}
+            {#if $experimental && session && role.isDelegateOrAuthor(session.publicKey, delegates, issue.author.id) && issueState === "read"}
               <div class="global-hide-on-mobile-down">
                 <Button
                   variant="outline"
@@ -517,7 +518,7 @@
             {/if}
             {#if issueState === "read"}
               <Share {baseUrl} />
-              {#if session && role.isDelegateOrAuthor(session.publicKey, delegates, issue.author.id)}
+              {#if $experimental && session && role.isDelegateOrAuthor(session.publicKey, delegates, issue.author.id)}
                 <div class="global-hide-on-small-desktop-down">
                   <CobStateButton
                     items={items.filter(
@@ -588,9 +589,7 @@
               labels={issue.labels}
               submitInProgress={labelState === "submit"}
               on:save={({ detail: newLabels }) => void saveLabels(newLabels)} />
-            <div class="global-hide-on-mobile-down">
-              <Embeds embeds={uniqueEmbeds} />
-            </div>
+            <Embeds embeds={uniqueEmbeds} />
           </div>
         </div>
         <svelte:fragment slot="description">
@@ -628,12 +627,10 @@
                 }
               }} />
           {:else if issue.discussion[0].body}
-            <div style:max-width="fit-content">
-              <Markdown
-                breaks
-                content={issue.discussion[0].body}
-                rawPath={rawPath(project.head)} />
-            </div>
+            <Markdown
+              breaks
+              content={issue.discussion[0].body}
+              rawPath={rawPath(project.head)} />
           {:else}
             <span class="txt-missing">No description</span>
           {/if}

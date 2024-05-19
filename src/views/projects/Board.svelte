@@ -4,7 +4,7 @@
 
   import type { BaseUrl, Project } from "@httpd-client";
 
-  import { config } from "@app/lib/config";
+  import config from "virtual:config";
   import { httpdStore } from "@app/lib/httpd";
   import * as utils from "@app/lib/utils";
   import * as role from "@app/lib/roles";

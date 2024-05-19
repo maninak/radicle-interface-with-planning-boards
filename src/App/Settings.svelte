@@ -1,6 +1,6 @@
 <script lang="ts">
   import { api, changeHttpdPort } from "@app/lib/httpd";
-  import { config } from "@app/lib/config";
+  import config from "virtual:config";
   import {
     codeFont,
     codeFonts,
@@ -109,7 +109,7 @@
       </Radio>
     </div>
   </div>
-  <div class="item">
+  <div class="item global-hide-on-mobile-down">
     <div>Radicle HTTP Daemon Port</div>
     <div class="right txt-monospace" style:width="6rem">
       <TextInput

@@ -122,6 +122,11 @@
       width: inherit;
       padding: 0;
     }
+    .placeholder {
+      border-radius: 0;
+      border-left: 0;
+      border-right: 0;
+    }
   }
 </style>
 
@@ -195,6 +200,13 @@
             blob={blobResult.blob}
             highlighted={blobResult.highlighted}
             rawPath={rawPath(tree.lastCommit.id)} />
+        {:else if blobResult.error.status === 413}
+          <div class="placeholder">
+            <Placeholder
+              iconName="exclamation-circle"
+              caption="This file is too big to be displayed.
+              If you want to view this file, clone this repository locally." />
+          </div>
         {:else if path === "/"}
           <div class="placeholder">
             <Placeholder iconName="no-file" caption="No README found." />

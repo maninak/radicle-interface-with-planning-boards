@@ -3,7 +3,7 @@
 
   import { createEventDispatcher } from "svelte";
 
-  import config from "@app/config.json";
+  import config from "virtual:config";
 
   import IconButton from "./IconButton.svelte";
   import IconSmall from "./IconSmall.svelte";
@@ -41,7 +41,7 @@
 
 <div>
   <Popover
-    popoverPositionBottom="2rem"
+    popoverPositionBottom="2.5rem"
     popoverPositionLeft="0"
     popoverPadding="0">
     <IconButton

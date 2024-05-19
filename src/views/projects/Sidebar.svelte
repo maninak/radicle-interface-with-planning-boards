@@ -6,7 +6,7 @@
   import { queryProject } from "@app/lib/projects";
   import { httpdStore, api } from "@app/lib/httpd";
   import { isLocal } from "@app/lib/utils";
-  import { config } from "@app/lib/config";
+  import config from "virtual:config";
   import { onMount } from "svelte";
 
   import Button from "@app/components/Button.svelte";

@@ -1,9 +1,10 @@
 <script lang="ts">
   import type { BaseUrl, CommitHeader } from "@httpd-client";
 
-  import { formatCommit, twemoji } from "@app/lib/utils";
+  import { twemoji } from "@app/lib/utils";
 
   import CommitAuthorship from "./CommitAuthorship.svelte";
+  import CommitLink from "@app/views/projects/components/CommitLink.svelte";
   import ExpandButton from "@app/components/ExpandButton.svelte";
   import IconButton from "@app/components/IconButton.svelte";
   import IconSmall from "@app/components/IconSmall.svelte";
@@ -59,6 +60,9 @@
   }
   .summary:hover {
     text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 2px;
+    cursor: pointer;
   }
   .commit-message {
     margin: 0.5rem 0;
@@ -100,7 +104,7 @@
       </div>
     {/if}
     <CommitAuthorship header={commit}>
-      <span class="global-commit">{formatCommit(commit.id)}</span>
+      <CommitLink {baseUrl} {projectId} commitId={commit.id} />
     </CommitAuthorship>
   </div>
   <div class="right">

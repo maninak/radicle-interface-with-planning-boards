@@ -1,4 +1,6 @@
+import config from "config";
 import path from "node:path";
+import virtual from "vite-plugin-virtual";
 import { defineConfig } from "vite";
 import { svelte } from "@sveltejs/vite-plugin-svelte";
 
@@ -9,6 +11,9 @@ export default defineConfig({
     reporters: "verbose",
   },
   plugins: [
+    virtual({
+      "virtual:config": config.util.toObject(),
+    }),
     svelte({
       // Reference: https://github.com/sveltejs/vite-plugin-svelte/issues/270#issuecomment-1033190138
       dynamicCompileOptions({ filename }) {
@@ -42,39 +47,18 @@ export default defineConfig({
     outDir: "build",
     rollupOptions: {
       output: {
-        manualChunks: {
-          markdown: [
-            "@radicle/gray-matter",
-            "dompurify",
-            "hast-util-to-dom",
-            "hast-util-to-html",
-            "katex",
-            "marked",
-          ],
-          syntax: ["@wooorm/starry-night"],
-          grammarsTsx: [
-            "@wooorm/starry-night/source.ts",
-            "@wooorm/starry-night/source.tsx",
-          ],
-          grammars: [
-            "@wooorm/starry-night/source.python",
-            "@wooorm/starry-night/source.js",
-            "@wooorm/starry-night/source.perl",
-            "@wooorm/starry-night/source.haskell",
-            "@wooorm/starry-night/source.ruby",
-            "@wooorm/starry-night/source.css",
-            "@wooorm/starry-night/source.solidity",
-            "@wooorm/starry-night/source.cs",
-            "@wooorm/starry-night/source.swift",
-          ],
-          dom: ["svelte", "twemoji"],
+        manualChunks: id => {
+          if (id.includes("lodash")) {
+            return "lodash";
+          } else if (id.includes("katex")) {
+            return "katex";
+          } else if (id.includes("node_modules")) {
+            return "vendor";
+          } else if (id.includes("components")) {
+            return "components";
+          }
         },
       },
     },
-  },
-
-  define: {
-    VITEST: process.env.VITEST !== undefined,
-    PLAYWRIGHT: process.env.PLAYWRIGHT_TEST_BASE_URL !== undefined,
   },
 });

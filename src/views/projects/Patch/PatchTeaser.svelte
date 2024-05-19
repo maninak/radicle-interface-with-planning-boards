@@ -40,25 +40,23 @@
     background-color: var(--color-fill-float-hover);
   }
   .content {
+    width: 100%;
     gap: 0.5rem;
     display: flex;
     flex-direction: column;
   }
   .subtitle {
     display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: var(--font-size-small);
+    flex-direction: column;
     flex-wrap: wrap;
+    font-size: var(--font-size-small);
+    gap: 0.5rem;
   }
   .summary {
     display: flex;
-    flex-direction: row;
-    gap: 1rem;
-  }
-  .patch-title:hover {
-    text-decoration: underline;
+    align-items: flex-start;
+    gap: 0.5rem;
+    word-break: break-word;
   }
   .right {
     margin-left: auto;
@@ -87,14 +85,7 @@
     display: flex;
     flex-direction: row;
     gap: 0.5rem;
-    margin-left: 0.5rem;
     min-height: 1.5rem;
-  }
-  @media (max-width: 719.98px) {
-    .diff-comment {
-      flex-direction: column-reverse;
-      align-items: flex-end;
-    }
   }
 </style>
 
@@ -110,50 +101,60 @@
   <div class="content">
     <div class="summary">
       <Link
+        styleHoverState
         route={{
           resource: "project.patch",
           project: projectId,
           node: baseUrl,
           patch: patch.id,
         }}>
-        <span class="patch-title">
-          <InlineMarkdown fontSize="regular" content={patch.title}>
-            {#if patch.labels.length > 0}
-              <span style="display: inline-flex; gap: 0.5rem; flex-wrap: wrap;">
-                <Labels labels={patch.labels} />
-              </span>
-            {/if}
-          </InlineMarkdown>
-        </span>
+        <InlineMarkdown fontSize="regular" content={patch.title} />
       </Link>
+      {#if patch.labels.length > 0}
+        <span
+          class="global-hide-on-small-desktop-down"
+          style="display: inline-flex; gap: 0.5rem;">
+          <Labels labels={patch.labels} />
+        </span>
+      {/if}
+      <div class="right">
+        <div class="diff-comment">
+          {#if commentCount > 0}
+            <CommentCounter {commentCount} />
+          {/if}
+          <DiffStatBadgeLoader {projectId} {baseUrl} {patch} {latestRevision} />
+        </div>
+      </div>
     </div>
     <div class="summary">
       <span class="subtitle">
-        <NodeId
-          stylePopoverPositionLeft="-13px"
-          nodeId={patch.author.id}
-          alias={patch.author.alias} />
-        {patch.revisions.length > 1 ? "updated" : "opened"}
-        <span class="global-oid">{formatObjectId(patch.id)}</span>
-        {#if patch.revisions.length > 1}
-          <span class="global-hide-on-mobile-down">
-            to <span class="global-oid">
-              {formatObjectId(patch.revisions[patch.revisions.length - 1].id)}
-            </span>
-          </span>
+        {#if patch.labels.length > 0}
+          <div
+            class="global-hide-on-medium-desktop-up"
+            style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <Labels labels={patch.labels} />
+          </div>
         {/if}
-        <span title={absoluteTimestamp(latestRevision.timestamp)}>
-          {formatTimestamp(latestRevision.timestamp)}
-        </span>
+        <div
+          style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+          <NodeId
+            stylePopoverPositionLeft="-13px"
+            nodeId={patch.author.id}
+            alias={patch.author.alias} />
+          {patch.revisions.length > 1 ? "updated" : "opened"}
+          <span class="global-oid">{formatObjectId(patch.id)}</span>
+          {#if patch.revisions.length > 1}
+            <span class="global-hide-on-mobile-down">
+              to <span class="global-oid">
+                {formatObjectId(patch.revisions[patch.revisions.length - 1].id)}
+              </span>
+            </span>
+          {/if}
+          <span title={absoluteTimestamp(latestRevision.timestamp)}>
+            {formatTimestamp(latestRevision.timestamp)}
+          </span>
+        </div>
       </span>
-    </div>
-  </div>
-  <div class="right">
-    <div class="diff-comment">
-      {#if commentCount > 0}
-        <CommentCounter {commentCount} />
-      {/if}
-      <DiffStatBadgeLoader {projectId} {baseUrl} {patch} {latestRevision} />
     </div>
   </div>
 </div>

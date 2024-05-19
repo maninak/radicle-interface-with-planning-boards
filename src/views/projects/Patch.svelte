@@ -66,6 +66,7 @@
   import CobHeader from "@app/views/projects/Cob/CobHeader.svelte";
   import CobStateButton from "@app/views/projects/Cob/CobStateButton.svelte";
   import CommentToggleInput from "@app/components/CommentToggleInput.svelte";
+  import CompareButton from "@app/views/projects/Patch/CompareButton.svelte";
   import CopyableId from "@app/components/CopyableId.svelte";
   import DiffStatBadge from "@app/components/DiffStatBadge.svelte";
   import Embeds from "@app/views/projects/Cob/Embeds.svelte";
@@ -652,10 +653,11 @@
     gap: 0.5rem;
     font-weight: var(--font-weight-semibold);
     font-size: var(--font-size-large);
+    word-break: break-word;
   }
   .bottom {
     background-color: var(--color-background-default);
-    padding: 1rem 1rem 0 1rem;
+    padding: 1rem 1rem 0.5rem 1rem;
     height: 100%;
   }
   .actions {
@@ -688,10 +690,6 @@
     gap: 0.5rem;
     width: 100%;
   }
-  .diff-button-range {
-    font-family: var(--font-family-monospace);
-    font-weight: var(--font-weight-bold);
-  }
   .connector {
     width: 1px;
     height: 1.5rem;
@@ -708,7 +706,7 @@
   }
 </style>
 
-<Layout {baseUrl} {project} activeTab="patches">
+<Layout {baseUrl} {project} activeTab="patches" stylePaddingBottom="0">
   <div class="patch">
     <div class="main">
       <CobHeader>
@@ -731,7 +729,7 @@
               </div>
             {/if}
           </div>
-          {#if session && role.isDelegateOrAuthor(session.publicKey, delegates, patch.author.id) && patchState === "read"}
+          {#if $experimental && session && role.isDelegateOrAuthor(session.publicKey, delegates, patch.author.id) && patchState === "read"}
             <div class="global-hide-on-mobile-down">
               <Button
                 variant="outline"
@@ -744,7 +742,7 @@
           {/if}
           {#if patchState === "read"}
             <Share {baseUrl} />
-            {#if session && role.isDelegateOrAuthor(session.publicKey, delegates, patch.author.id)}
+            {#if $experimental && session && role.isDelegateOrAuthor(session.publicKey, delegates, patch.author.id)}
               <div class="global-hide-on-small-desktop-down">
                 <CobStateButton
                   items={items.filter(
@@ -848,12 +846,10 @@
                   }
                 }} />
             {:else if description}
-              <div style:max-width="fit-content">
-                <Markdown
-                  breaks
-                  content={description}
-                  rawPath={rawPath(patch.id)} />
-              </div>
+              <Markdown
+                breaks
+                content={description}
+                rawPath={rawPath(patch.id)} />
             {:else}
               <span class="txt-missing">No description available</span>
             {/if}
@@ -898,35 +894,15 @@
             <Link {route}>
               <Button
                 size="large"
-                variant={name === view.name ? "tab-active" : "tab"}>
+                variant={name === view.name ||
+                (view.name === "diff" && name === "changes")
+                  ? "tab-active"
+                  : "tab"}>
                 <IconSmall name={icon} />
                 {capitalize(name)}
               </Button>
             </Link>
           {/each}
-          {#if view.name === "diff"}
-            <Link
-              route={{
-                resource: "project.patch",
-                project: project.id,
-                node: baseUrl,
-                patch: patch.id,
-                view: {
-                  name: "diff",
-                  fromCommit: view.fromCommit,
-                  toCommit: view.toCommit,
-                },
-              }}>
-              <Button size="large" variant="tab-active">
-                Compare <span class="diff-button-range">
-                  {view.fromCommit.substring(0, 6)}..{view.toCommit.substring(
-                    0,
-                    6,
-                  )}
-                </span>
-              </Button>
-            </Link>
-          {/if}
         </Radio>
 
         {#if view.name === "changes"}
@@ -934,6 +910,17 @@
             class="global-hide-on-mobile-down"
             style="margin-left: auto; margin-top: -0.5rem;">
             <RevisionSelector {view} {baseUrl} {patch} {project} />
+          </div>
+        {/if}
+        {#if view.name === "diff"}
+          <div
+            class="global-hide-on-mobile-down"
+            style="margin-left: auto; margin-top: -0.5rem;">
+            <div style:margin-left="auto">
+              <CompareButton
+                fromCommit={view.fromCommit}
+                toCommit={view.toCommit} />
+            </div>
           </div>
         {/if}
         <div class="tabs-spacer" />
@@ -945,12 +932,19 @@
             style:padding="0 1rem"
             style:display="flex"
             class="global-hide-on-small-desktop-up">
-            <div style:margin-left="auto">
-              <RevisionSelector {view} {baseUrl} {patch} {project} />
-            </div>
+            <RevisionSelector {view} {baseUrl} {patch} {project} />
           </div>
         {/if}
         {#if view.name === "diff"}
+          <div
+            style:width="100%"
+            style:padding="0 1rem"
+            style:display="flex"
+            class="global-hide-on-small-desktop-up">
+            <CompareButton
+              fromCommit={view.fromCommit}
+              toCommit={view.toCommit} />
+          </div>
           <Changeset
             {baseUrl}
             projectId={project.id}

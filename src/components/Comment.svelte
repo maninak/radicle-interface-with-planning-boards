@@ -141,6 +141,11 @@
         nodeId={authorId}
         alias={authorAlias} />
       <slot name="caption">{caption}</slot>
+      {#if id}
+        <span class="global-oid">
+          {utils.formatObjectId(id)}
+        </span>
+      {/if}
       <span class="timestamp" title={utils.absoluteTimestamp(timestamp)}>
         {utils.formatTimestamp(timestamp)}
       </span>
@@ -192,7 +197,7 @@
             state = "read";
           }} />
       {:else}
-        <div style:overflow="hidden">
+        <div style:overflow="hidden" style:width="100%">
           <Markdown breaks {rawPath} content={body} />
         </div>
       {/if}

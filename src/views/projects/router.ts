@@ -22,7 +22,7 @@ import type {
 
 import * as Syntax from "@app/lib/syntax";
 import * as httpd from "@app/lib/httpd";
-import config from "@app/config.json";
+import config from "virtual:config";
 import { HttpdClient } from "@httpd-client";
 import { ResponseError } from "@httpd-client/lib/fetcher";
 import { handleError } from "@app/views/projects/error";
@@ -213,7 +213,7 @@ export type ProjectLoadedRoute =
 
 export type BlobResult =
   | { ok: true; blob: Blob; highlighted: Syntax.Root | undefined }
-  | { ok: false; error: { message: string; path: string } };
+  | { ok: false; error: { status?: number; message: string; path: string } };
 
 export type PatchView =
   | {
@@ -516,8 +516,17 @@ async function loadBlob(
         ? await Syntax.highlight(blob.content, blob.path.split(".").pop() ?? "")
         : undefined,
     };
-  } catch {
-    if (path === "/") {
+  } catch (e: unknown) {
+    if (e instanceof ResponseError) {
+      return {
+        ok: false,
+        error: {
+          status: e.status,
+          message: "Not able to load file",
+          path,
+        },
+      };
+    } else if (path === "/") {
       return {
         ok: false,
         error: {

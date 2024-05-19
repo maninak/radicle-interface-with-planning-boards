@@ -2,7 +2,7 @@
   import type { ActiveTab } from "./Header.svelte";
   import type { BaseUrl, Project } from "@httpd-client";
 
-  import { config } from "@app/lib/config";
+  import config from "virtual:config";
 
   import AppHeader from "@app/App/Header.svelte";
 
