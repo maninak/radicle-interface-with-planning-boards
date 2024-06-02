@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import type { BaseUrl } from "@httpd-client";
-import type { ExecaChildProcess, Options as ExecaOptions } from "execa";
-
+import type * as Execa from "execa";
+import { execa } from "execa";
 import * as Fs from "node:fs/promises";
 import * as Os from "node:os";
 import * as Path from "node:path";
@@ -10,10 +10,7 @@ import * as Util from "node:util";
 import getPort from "get-port";
 import matches from "lodash/matches.js";
 import waitOn from "wait-on";
-import { execa } from "execa";
 import * as readline from "node:readline/promises";
-
-import * as Process from "./process.js";
 import { randomTag } from "@tests/support/support.js";
 import { sleep } from "@app/lib/sleep.js";
 import { array, literal, number, object, string, union, z } from "zod";
@@ -151,13 +148,20 @@ export const NodeConfigSchema = object({
 
 export interface NodeConfig extends z.infer<typeof NodeConfigSchema> {}
 
-// Options passed to `RadiclePeer#rad` and `RadiclePeer#git` that control how
-// the process is spawned.
-interface SpawnOptions extends ExecaOptions {
-  // Sets the prefix for the commands output in the logs. If `null`, does not
-  // log any output. Defaults to `<peer name> <binary name>`.
-  logPrefix?: string | null;
-}
+// Specialize the return type of `execa()` to guarantee that `stdout` and
+// `stderr` are strings.
+type SpawnResult = Execa.ResultPromise<
+  SpawnOptions & {
+    stdout: (line: unknown) => AsyncGenerator<string, void, void>;
+    stderr: (line: unknown) => AsyncGenerator<string, void, void>;
+    encoding: "utf8";
+  }
+>;
+
+type SpawnOptions = Omit<
+  Execa.Options,
+  "stdin" | "stdout" | "stderr" | "lines" | "encoding"
+>;
 
 export class RadiclePeer {
   public checkoutPath: string;
@@ -171,11 +175,10 @@ export class RadiclePeer {
   #gitOptions?: Record<string, string>;
   #listenSocketAddr?: string;
   #httpdBaseUrl?: BaseUrl;
-  #nodeProcess?: ExecaChildProcess;
-  #httpdProcess?: ExecaChildProcess;
+  #nodeProcess?: SpawnResult;
   // Name for easy identification. Used on file system and in logs.
   #name: string;
-  #childProcesses: ExecaChildProcess[] = [];
+  #childProcesses: SpawnResult[] = [];
 
   private constructor(props: {
     checkoutPath: string;
@@ -266,7 +269,7 @@ export class RadiclePeer {
       port,
       scheme: "http",
     };
-    this.#httpdProcess = this.spawn("radicle-httpd", [
+    void this.spawn("radicle-httpd", [
       "--listen",
       `${this.#httpdBaseUrl.hostname}:${this.#httpdBaseUrl.port}`,
     ]);
@@ -277,23 +280,6 @@ export class RadiclePeer {
       ],
       timeout: 2000,
     });
-  }
-
-  public async stopHttpd() {
-    if (!this.#httpdBaseUrl || !this.#httpdProcess) {
-      return;
-    }
-    this.#httpdProcess.kill("SIGTERM");
-
-    await waitOn({
-      resources: [
-        `tcp:${this.#httpdBaseUrl.hostname}:${this.#httpdBaseUrl.port}`,
-      ],
-      reverse: true,
-      timeout: 2000,
-    });
-
-    this.#httpdBaseUrl = undefined;
   }
 
   public async startNode(nodeParams: Partial<NodeConfig["node"]> = {}) {
@@ -314,7 +300,6 @@ export class RadiclePeer {
 
     const { stdout } = this.rad(["node", "events"], {
       cwd: this.#radHome,
-      logPrefix: null,
     });
 
     if (!stdout) {
@@ -345,6 +330,9 @@ export class RadiclePeer {
   }
 
   public async stopNode() {
+    // Don’t leak unhandled rejections when forcefully killing the process
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    this.#nodeProcess?.catch(() => {});
     this.#nodeProcess?.kill("SIGTERM");
 
     await waitOn({
@@ -355,14 +343,18 @@ export class RadiclePeer {
   }
 
   /**
-   * Kill all child processes created with `spawn()`, the node process and the
-   * HTTP API process.
+   * Kill all child processes created with `spawn()`, including the node and
+   * httpd processes.
    */
   public async shutdown() {
     // We don’t care about proper cleanup. We just want to make sure that no
     // processes are running anymore.
-    this.#childProcesses.forEach(p => p.kill("SIGKILL"));
-    await Promise.all([this.stopNode(), this.stopHttpd()]);
+    this.#childProcesses.forEach(p => {
+      // Don’t leak unhandled rejections when forcefully killing the process
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
+      p.catch(() => {});
+      p.kill("SIGKILL");
+    });
   }
 
   public get address(): string {
@@ -392,11 +384,11 @@ export class RadiclePeer {
     return this.#httpdBaseUrl;
   }
 
-  public git(args: string[] = [], opts?: SpawnOptions): ExecaChildProcess {
+  public git(args: string[] = [], opts?: SpawnOptions): SpawnResult {
     return this.spawn("git", args, { ...opts });
   }
 
-  public rad(args: string[] = [], opts?: SpawnOptions): ExecaChildProcess {
+  public rad(args: string[] = [], opts?: SpawnOptions): SpawnResult {
     return this.spawn("rad", args, { ...opts });
   }
 
@@ -404,8 +396,18 @@ export class RadiclePeer {
     cmd: string,
     args: string[] = [],
     opts?: SpawnOptions,
-  ): ExecaChildProcess {
-    opts = {
+  ): SpawnResult {
+    const prefix = logPrefix(`${this.#name} ${cmd}`);
+    const outputLog = this.#outputLog;
+
+    function* logWithPrefix(line: unknown) {
+      if (typeof line === "string") {
+        outputLog.write(`${prefix} ${line}\n`, "utf8");
+      }
+      yield line;
+    }
+
+    const childProcess = execa(cmd, args, {
       ...opts,
       env: {
         GIT_CONFIG_GLOBAL: "/dev/null",
@@ -418,17 +420,12 @@ export class RadiclePeer {
         ...opts?.env,
         ...this.#gitOptions,
       },
-    };
-    const childProcess = Process.spawn(cmd, args, opts);
-    this.#childProcesses.push(childProcess);
+      encoding: "utf8",
+      stdout: logWithPrefix,
+      stderr: logWithPrefix,
+    });
 
-    if (opts.logPrefix !== null) {
-      void Process.prefixOutput(
-        childProcess,
-        opts.logPrefix || `${this.#name} ${cmd}`,
-        this.#outputLog,
-      );
-    }
+    this.#childProcesses.push(childProcess);
 
     return childProcess;
   }
