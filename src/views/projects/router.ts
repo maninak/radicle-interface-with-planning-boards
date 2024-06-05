@@ -13,6 +13,7 @@ import type {
   DiffBlob,
   Issue,
   IssueState,
+  Node,
   Patch,
   PatchState,
   Project,
@@ -121,6 +122,7 @@ export type ProjectLoadedRoute =
       resource: "project.source";
       params: {
         baseUrl: BaseUrl;
+        node: Node;
         commit: string;
         project: Project;
         peers: Remote[];
@@ -138,6 +140,7 @@ export type ProjectLoadedRoute =
       resource: "project.history";
       params: {
         baseUrl: BaseUrl;
+        node: Node;
         commit: string;
         project: Project;
         peers: Remote[];
@@ -153,6 +156,7 @@ export type ProjectLoadedRoute =
       resource: "project.commit";
       params: {
         baseUrl: BaseUrl;
+        node: Node;
         project: Project;
         commit: Commit;
       };
@@ -161,6 +165,7 @@ export type ProjectLoadedRoute =
       resource: "project.issue";
       params: {
         baseUrl: BaseUrl;
+        node: Node;
         project: Project;
         rawPath: (commit?: string) => string;
         issue: Issue;
@@ -170,6 +175,7 @@ export type ProjectLoadedRoute =
       resource: "project.issues";
       params: {
         baseUrl: BaseUrl;
+        node: Node;
         project: Project;
         issues: Issue[];
         state: IssueState["status"];
@@ -179,6 +185,7 @@ export type ProjectLoadedRoute =
       resource: "project.newIssue";
       params: {
         baseUrl: BaseUrl;
+        node: Node;
         project: Project;
         rawPath: (commit?: string) => string;
       };
@@ -187,6 +194,7 @@ export type ProjectLoadedRoute =
       resource: "project.patches";
       params: {
         baseUrl: BaseUrl;
+        node: Node;
         project: Project;
         patches: Patch[];
         state: PatchState["status"];
@@ -196,6 +204,7 @@ export type ProjectLoadedRoute =
       resource: "project.patch";
       params: {
         baseUrl: BaseUrl;
+        node: Node;
         project: Project;
         rawPath: (commit?: string) => string;
         patch: Patch;
@@ -207,6 +216,7 @@ export type ProjectLoadedRoute =
       resource: "project.board";
       params: {
         baseUrl: BaseUrl;
+        node: Node;
         project: Project;
       };
     };
@@ -285,6 +295,16 @@ export async function loadProjectRoute(
   previousLoaded: LoadedRoute,
 ): Promise<ProjectLoadedRoute | ErrorRoute | NotFoundRoute> {
   const api = new HttpdClient(route.node);
+  let node: Node | undefined = undefined;
+  if (
+    "params" in previousLoaded &&
+    "node" in previousLoaded.params &&
+    route.node.hostname === previousLoaded.params.baseUrl.hostname
+  ) {
+    node = previousLoaded.params.node;
+  } else {
+    node = await api.getNode();
+  }
   const rawPath = (commit?: string) =>
     `${route.node.scheme}://${route.node.hostname}:${route.node.port}/raw/${
       route.project
@@ -292,9 +312,9 @@ export async function loadProjectRoute(
 
   try {
     if (route.resource === "project.source") {
-      return await loadTreeView(route, previousLoaded);
+      return await loadTreeView(route, previousLoaded, node);
     } else if (route.resource === "project.history") {
-      return await loadHistoryView(route);
+      return await loadHistoryView(route, node);
     } else if (route.resource === "project.commit") {
       const [project, commit] = await Promise.all([
         api.project.getById(route.project),
@@ -305,28 +325,30 @@ export async function loadProjectRoute(
         resource: "project.commit",
         params: {
           baseUrl: route.node,
+          node,
           project,
           commit,
         },
       };
     } else if (route.resource === "project.issue") {
-      return await loadIssueView(route);
+      return await loadIssueView(route, node);
     } else if (route.resource === "project.patch") {
-      return await loadPatchView(route);
+      return await loadPatchView(route, node);
     } else if (route.resource === "project.issues") {
-      return await loadIssuesView(route);
+      return await loadIssuesView(route, node);
     } else if (route.resource === "project.newIssue") {
       const project = await api.project.getById(route.project);
       return {
         resource: "project.newIssue",
         params: {
           baseUrl: route.node,
+          node,
           project,
           rawPath,
         },
       };
     } else if (route.resource === "project.patches") {
-      return await loadPatchesView(route);
+      return await loadPatchesView(route, node);
     } else if (route.resource === "project.board") {
       if (!config?.plugins?.radiclePlanningBoards?.enabled) {
         return {
@@ -335,7 +357,7 @@ export async function loadProjectRoute(
         };
       }
 
-      return await loadBoardView(route);
+      return await loadBoardView(route, node);
     } else {
       return unreachable(route);
     }
@@ -354,6 +376,7 @@ export async function loadProjectRoute(
 
 async function loadBoardView(
   route: ProjectBoardRoute,
+  node: Node,
 ): Promise<ProjectLoadedRoute> {
   const api = new HttpdClient(route.node);
   const project = await api.project.getById(route.project);
@@ -362,6 +385,7 @@ async function loadBoardView(
     resource: "project.board",
     params: {
       baseUrl: route.node,
+      node,
       project,
     },
   };
@@ -369,6 +393,7 @@ async function loadBoardView(
 
 async function loadPatchesView(
   route: ProjectPatchesRoute,
+  node: Node,
 ): Promise<ProjectLoadedRoute> {
   const api = new HttpdClient(route.node);
   const searchParams = new URLSearchParams(route.search || "");
@@ -387,6 +412,7 @@ async function loadPatchesView(
     resource: "project.patches",
     params: {
       baseUrl: route.node,
+      node,
       patches,
       state,
       project,
@@ -396,6 +422,7 @@ async function loadPatchesView(
 
 async function loadIssuesView(
   route: ProjectIssuesRoute,
+  node: Node,
 ): Promise<ProjectLoadedRoute> {
   const api = new HttpdClient(route.node);
   const state = route.state || "open";
@@ -414,6 +441,7 @@ async function loadIssuesView(
     resource: "project.issues",
     params: {
       baseUrl: route.node,
+      node,
       issues,
       state,
       project,
@@ -424,6 +452,7 @@ async function loadIssuesView(
 async function loadTreeView(
   route: ProjectTreeRoute,
   previousLoaded: LoadedRoute,
+  node: Node,
 ): Promise<ProjectLoadedRoute | NotFoundRoute> {
   const api = new HttpdClient(route.node);
   const rawPath = (commit?: string) =>
@@ -489,6 +518,7 @@ async function loadTreeView(
     resource: "project.source",
     params: {
       baseUrl: route.node,
+      node,
       commit,
       project,
       peers: peers.filter(remote => Object.keys(remote.heads).length > 0),
@@ -555,6 +585,7 @@ async function loadBlob(
 }
 async function loadHistoryView(
   route: ProjectHistoryRoute,
+  node: Node,
 ): Promise<ProjectLoadedRoute> {
   const api = new HttpdClient(route.node);
 
@@ -593,6 +624,7 @@ async function loadHistoryView(
     resource: "project.history",
     params: {
       baseUrl: route.node,
+      node,
       commit: commitId,
       project,
       peers: peers.filter(remote => Object.keys(remote.heads).length > 0),
@@ -608,6 +640,7 @@ async function loadHistoryView(
 
 async function loadIssueView(
   route: ProjectIssueRoute,
+  node: Node,
 ): Promise<ProjectLoadedRoute> {
   const api = new HttpdClient(route.node);
   const rawPath = (commit?: string) =>
@@ -623,6 +656,7 @@ async function loadIssueView(
     resource: "project.issue",
     params: {
       baseUrl: route.node,
+      node,
       project,
       rawPath,
       issue,
@@ -632,6 +666,7 @@ async function loadIssueView(
 
 async function loadPatchView(
   route: ProjectPatchRoute,
+  node: Node,
 ): Promise<ProjectLoadedRoute> {
   const api = new HttpdClient(route.node);
   const rawPath = (commit?: string) =>
@@ -697,6 +732,7 @@ async function loadPatchView(
     resource: "project.patch",
     params: {
       baseUrl: route.node,
+      node,
       project,
       rawPath,
       patch,

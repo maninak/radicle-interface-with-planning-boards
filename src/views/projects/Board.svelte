@@ -2,7 +2,7 @@
   import { onMount } from "svelte";
   import { z, string, literal, object } from "zod";
 
-  import type { BaseUrl, Project } from "@httpd-client";
+  import type { BaseUrl, Node, Project } from "@httpd-client";
 
   import config from "virtual:config";
   import { httpdStore } from "@app/lib/httpd";
@@ -15,6 +15,7 @@
   import Layout from "./Layout.svelte";
 
   export let baseUrl: BaseUrl;
+  export let node: Node;
   export let project: Project;
 
   const RpbBoardsConfigSchema = object({
@@ -133,7 +134,7 @@
 
 <svelte:window on:message={handleIncomingMessage} />
 
-<Layout {baseUrl} {project} activeTab="board">
+<Layout {node} {baseUrl} {project} activeTab="board">
   {#if error}
     <ErrorMessage
       title="Invalid configuration"
