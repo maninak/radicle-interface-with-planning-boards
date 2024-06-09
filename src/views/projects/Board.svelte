@@ -2,7 +2,7 @@
   import { onMount } from "svelte";
   import { z, string, literal, object } from "zod";
 
-  import type { BaseUrl, Node, Project } from "@httpd-client";
+  import type { BaseUrl, Node, Project } from "@http-client";
 
   import config from "virtual:config";
   import { httpdStore } from "@app/lib/httpd";
@@ -13,6 +13,7 @@
   import ErrorMessage from "@app/components/ErrorMessage.svelte";
   import Loading from "@app/components/Loading.svelte";
   import Layout from "./Layout.svelte";
+  import type { ErrorParam } from "@app/lib/router/definitions";
 
   export let baseUrl: BaseUrl;
   export let node: Node;
@@ -42,7 +43,7 @@
       };
 
   let loading = true;
-  let error: any;
+  let error: ErrorParam = undefined;
   let rpbConfig: RpbConfig | undefined;
   let iFrameSrc: string;
   let iFrame: HTMLIFrameElement;
@@ -96,7 +97,7 @@
       );
       iFrameSrc = url.toString();
     } catch (e) {
-      error = e;
+      error = e as Error;
     }
   });
 
