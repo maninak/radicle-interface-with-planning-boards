@@ -1,15 +1,15 @@
 import {
   aliceMainCommitCount,
   aliceMainCommitMessage,
-  aliceMainHead,
   bobMainCommitCount,
   expect,
   gitOptions,
+  shortAliceHead,
   shortBobHead,
   sourceBrowsingUrl,
   test,
 } from "@tests/support/fixtures.js";
-import { createProject } from "@tests/support/project";
+import { changeBranch, createProject } from "@tests/support/project";
 import sinon from "sinon";
 
 test("peer and branch switching", async ({ page }) => {
@@ -17,17 +17,15 @@ test("peer and branch switching", async ({ page }) => {
   await page
     .getByRole("link", { name: `Commits ${aliceMainCommitCount}` })
     .click();
+  await expect(page.getByText("Thursday, December 15,")).toBeVisible();
 
   // Alice's peer.
   {
-    await page.getByLabel("Change peer").click();
-    await page
-      .getByRole("link", {
-        name: "alice delegate",
-      })
-      .click();
+    await changeBranch("alice", `main ${shortAliceHead}`, page);
 
-    await expect(page.getByLabel("Change peer")).toHaveText("alice Delegate");
+    await expect(page.getByTitle("Change branch")).toHaveText(
+      "alice Delegate / main",
+    );
 
     await expect(page.getByText("Thursday, November 17, 2022")).toBeVisible();
     await expect(page.locator(".list .teaser")).toHaveCount(
@@ -36,7 +34,7 @@ test("peer and branch switching", async ({ page }) => {
 
     const latestCommit = page.locator(".teaser").first();
     await expect(latestCommit).toContainText(aliceMainCommitMessage);
-    await expect(latestCommit).toContainText(aliceMainHead.substring(0, 7));
+    await expect(latestCommit).toContainText(shortAliceHead);
 
     const earliestCommit = page.locator(".teaser").last();
     await expect(earliestCommit).toContainText(
@@ -44,8 +42,7 @@ test("peer and branch switching", async ({ page }) => {
     );
     await expect(earliestCommit).toContainText("36d5bbe");
 
-    await page.getByTitle("Change branch").click();
-    await page.getByText("feature/branch").click();
+    await changeBranch("alice", "feature/branch", page);
 
     await expect(
       page.getByRole("button", { name: "feature/branch" }),
@@ -53,8 +50,7 @@ test("peer and branch switching", async ({ page }) => {
     await expect(page.getByText("Thursday, November 17, 2022")).toBeVisible();
     await expect(page.locator(".list .teaser")).toHaveCount(bobMainCommitCount);
 
-    await page.getByTitle("Change branch").click();
-    await page.getByText("orphaned-branch").click();
+    await changeBranch("alice", "orphaned-branch", page);
 
     await expect(
       page.getByRole("button", { name: "orphaned-branch" }),
@@ -65,10 +61,9 @@ test("peer and branch switching", async ({ page }) => {
 
   // Bob's peer.
   {
-    await page.getByLabel("Change peer").click();
-    await page.getByRole("link", { name: "bob" }).click();
+    await changeBranch("bob", `main ${shortBobHead}`, page);
 
-    await expect(page.getByLabel("Change peer")).toContainText("bob");
+    await expect(page.getByTitle("Change branch")).toContainText("bob");
 
     await expect(page.getByText("Wednesday, December 21, 2022")).toBeVisible();
     await expect(page.locator(".list").first().locator(".teaser")).toHaveCount(
@@ -120,6 +115,7 @@ test("commit messages with double colon not converted into single colon", async 
       exact: true,
     })
     .click();
+  await page.waitForLoadState("networkidle");
   await expect(page.getByText(commitMessage, { exact: true })).toBeVisible();
 });
 
@@ -154,10 +150,10 @@ test("relative timestamps", async ({ page }) => {
   await page
     .getByRole("link", { name: `Commits ${aliceMainCommitCount}` })
     .click();
+  await expect(page.getByText("Thursday, December 15,")).toBeVisible();
 
-  await page.getByLabel("Change peer").click();
-  await page.getByRole("link", { name: "bob" }).click();
-  await expect(page.getByLabel("Change peer")).toHaveText("bob");
+  await changeBranch("bob", `main ${shortBobHead}`, page);
+  await expect(page.getByTitle("Change branch")).toHaveText(/bob/);
   const latestCommit = page.locator(".teaser").first();
   await expect(latestCommit).toContainText(
     `Bob Belcher committed ${shortBobHead} now`,

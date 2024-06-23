@@ -3,7 +3,7 @@ import { expect, test } from "@tests/support/fixtures.js";
 test("show pinned projects", async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem("experimental", "true"));
   await page.goto("/");
-  await expect(page.getByText("Local projects")).toBeVisible();
+  await expect(page.getByText("Local repositories")).toBeVisible();
 
   // Shows pinned project name.
   await expect(page.getByText("source-browsing")).toBeVisible();
@@ -100,7 +100,6 @@ const nodeInfo = {
     listen: [],
     peers: {
       type: "dynamic",
-      target: 0,
     },
     connect: [],
     externalAddresses: ["seed.rhizoma.dev:8776"],
@@ -132,8 +131,9 @@ const nodeInfo = {
       },
     },
     workers: 32,
-    policy: "block",
-    scope: "all",
+    seedingPolicy: {
+      default: "block",
+    },
   },
   state: "running",
 };
