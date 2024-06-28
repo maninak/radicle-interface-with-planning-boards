@@ -2,6 +2,7 @@ version: '3.8'
 
 services:
   radicle-explorer-with-boards:
+    image:  quay.io/radicle_in_containers/radicle-explorer-with-boards
     container_name: radicle-explorer-with-boards
     build:
       dockerfile: ./Containerfile
