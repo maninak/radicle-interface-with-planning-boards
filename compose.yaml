@@ -1,7 +1,8 @@
 version: '3.8'
 
 services:
-  caddy:
+  radicle-explorer-with-boards:
+    container_name: radicle-explorer-with-boards
     build:
       dockerfile: ./Containerfile
       context: .
@@ -9,7 +10,7 @@ services:
       - "3080:80"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
-      - caddy_data:/data
+      - explorer_caddy_data:/data
 
 volumes:
-  caddy_data:
+  explorer_caddy_data:

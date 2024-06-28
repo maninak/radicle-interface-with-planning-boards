@@ -1,9 +1,17 @@
-FROM node:20 as build
+FROM node:20 AS build
 
 WORKDIR /app
 
-COPY . ./
+
+# copy project file
+COPY package.json package-lock.json ./
+COPY ./scripts ./scripts
+COPY ./public ./public
+
+# install all deps (vite is needed when building, which is a dev dependency)
 RUN npm install
+
+COPY . ./
 RUN npm run build
 
 
