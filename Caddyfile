@@ -1,16 +1,12 @@
-
 localhost:80 {
-        @skip path_regexp \.(wasm|js|css|png|jpe?g|gif|ico|woff2?|otf|ttf|eot|svg|txt|pdf|docx?|xlsx?)$
-
-        @static {
-                file
-                path *.ico *.css *.js *.gif *.webp *.avif *.jpg *.jpeg *.png *.svg *.woff *.woff2
-        }
-#       header @static Cache-Control "public, max-age=259200"
-        root * /usr/share/caddy
-        encode zstd gzip
-        try_files {path} /index.html
-        file_server
+	root * /usr/share/caddy
+	try_files {path} /index.html
+	file_server
+	#header @static Cache-Control "public, max-age=259200"
+	#encode zstd gzip
+	#@skip path_regexp \.(wasm|js|css|png|jpe?g|gif|ico|woff2?|otf|ttf|eot|svg|txt|pdf|docx?|xlsx?)$
+	#@static {
+	#	file
+	#	path *.ico *.css *.js *.gif *.webp *.avif *.jpg *.jpeg *.png *.svg *.woff *.woff2
+	#}
 }
-
-
