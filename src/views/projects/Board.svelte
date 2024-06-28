@@ -25,9 +25,18 @@
   });
   type RpbConfig = z.infer<typeof RpbBoardsConfigSchema>;
 
-  const incomingMessageSchema = object({
-    type: literal("request-auth-token"),
-  });
+  const incomingMessageSchema = z.union([
+    z.object({
+      type: z.literal("request-auth-token"),
+    }),
+    z.object({
+      type: z.literal("request-query-params"),
+    }),
+    z.object({
+      type: z.literal("set-query-params"),
+      queryParams: z.record(string(), string()),
+    }),
+  ]);
 
   type OutgoingMessage =
     | {
@@ -40,6 +49,10 @@
       }
     | {
         type: "remove-auth-token";
+      }
+    | {
+        type: "query-params-updated";
+        queryParams: Record<string, string>;
       };
 
   let loading = true;
@@ -62,6 +75,31 @@
     iFrame?.contentWindow?.postMessage(message, rpbConfig.origin);
   }
 
+  function getQueryParams() {
+    const queryParams = new URLSearchParams(window.location.search);
+    const params: Record<string, string> = {};
+    for (const [key, value] of queryParams) {
+      params[key] = value;
+    }
+    return params;
+  }
+
+  function setQueryParams(params: Record<string, string>) {
+    const queryParams = new URLSearchParams();
+    for (const [key, value] of Object.entries(params)) {
+      queryParams.set(key, value);
+    }
+    window.history.replaceState(
+      {},
+      "",
+      `${window.location.pathname}?${queryParams.toString()}`,
+    );
+    postMessage({
+      type: "query-params-updated",
+      queryParams: getQueryParams(),
+    });
+  }
+
   function handleIncomingMessage(event: MessageEvent) {
     if (!rpbConfig || event.origin !== rpbConfig.origin) {
       return;
@@ -77,6 +115,15 @@
         if (session?.id) {
           postMessage({ type: "set-auth-token", authToken: session.id });
         }
+        break;
+      case "request-query-params":
+        postMessage({
+          type: "query-params-updated",
+          queryParams: getQueryParams(),
+        });
+        break;
+      case "set-query-params":
+        setQueryParams(result.data.queryParams);
         break;
     }
   }
