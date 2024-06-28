@@ -7,6 +7,10 @@ services:
     build:
       dockerfile: ./Containerfile
       context: .
+      args:
+        FALLBACK_PUBLIC_EXPLORER: http://localhost:3080/nodes/$host/$rid$path
+        DEFAULT_LOCAL_HTTPD_PORT: 3080
+        PLUGINS_RADICLE_PLANNING_BOARDS_ORIGIN: http://localhost:3090
     ports:
       - "3080:80"
     volumes:

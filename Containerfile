@@ -2,6 +2,9 @@ FROM node:20 AS build
 
 WORKDIR /app
 
+ARG FALLBACK_PUBLIC_EXPLORER
+ARG DEFAULT_LOCAL_HTTPD_PORT
+ARG PLUGINS_RADICLE_PLANNING_BOARDS_ORIGIN
 
 # copy project file
 COPY package.json package-lock.json ./
