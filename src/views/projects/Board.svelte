@@ -182,7 +182,7 @@
 
 <svelte:window on:message={handleIncomingMessage} />
 
-<Layout {node} {baseUrl} {project} activeTab="board">
+<Layout {node} {baseUrl} {project} activeTab="board" stylePaddingBottom="0">
   {#if error}
     <ErrorMessage
       title="Invalid configuration"
